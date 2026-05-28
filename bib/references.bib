@@ -1,0 +1,279 @@
+% ----------- Fundamentals -----------
+
+@article{kim2014flipping,
+  title={Flipping bits in memory without accessing them: An experimental study of DRAM disturbance errors},
+  author={Kim, Yoongu and Daly, Ross and Kim, Jeremie and Fallin, Chris and Lee, Ji Hye and Lee, Donghyuk and Wilkerson, Chris and Lai, Konrad and Mutlu, Onur},
+  journal={ACM SIGARCH Computer Architecture News},
+  volume={42},
+  number={3},
+  pages={361--372},
+  year={2014},
+  publisher={ACM New York, NY, USA}
+}
+
+@article{bhati2015dram,
+  title={DRAM refresh mechanisms, penalties, and trade-offs},
+  author={Bhati, Ishwar and Chang, Mu-Tien and Chishti, Zeshan and Lu, Shih-Lien and Jacob, Bruce},
+  journal={IEEE Transactions on Computers},
+  volume={65},
+  number={1},
+  pages={108--121},
+  year={2015},
+  publisher={IEEE}
+}
+
+% ----------- Attack Vectors -----------
+@misc{seaborn2015projectzero,
+  title        = {Project Zero: Exploiting the DRAM Rowhammer Bug to Gain Kernel Privileges},
+  author       = {Seaborn, Mark and Dullien, Thomas},
+  year         = {2015},
+  howpublished = {\url{https://googleprojectzero.blogspot.com/2015/03/exploiting-dram-rowhammer-bug-to-gain.html}},
+  note         = {Google Project Zero Blog}
+}
+
+@inproceedings{xiao2016one,
+  title={One bit flips, one cloud flops:$\{$Cross-VM$\}$ row hammer attacks and privilege escalation},
+  author={Xiao, Yuan and Zhang, Xiaokuan and Zhang, Yinqian and Teodorescu, Radu},
+  booktitle={25th USENIX security symposium (USENIX Security 16)},
+  pages={19--35},
+  year={2016}
+}
+
+@inproceedings{gruss2018another,
+  title={Another flip in the wall of rowhammer defenses},
+  author={Gruss, Daniel and Lipp, Moritz and Schwarz, Michael and Genkin, Daniel and Juffinger, Jonas and O'Connell, Sioli and Schoechl, Wolfgang and Yarom, Yuval},
+  booktitle={2018 IEEE Symposium on Security and Privacy (SP)},
+  pages={245--261},
+  year={2018},
+  organization={IEEE}
+}
+
+@inproceedings{van2016drammer,
+  title={Drammer: Deterministic rowhammer attacks on mobile platforms},
+  author={Van Der Veen, Victor and Fratantonio, Yanick and Lindorfer, Martina and Gruss, Daniel and Maurice, Cl{\'e}mentine and Vigna, Giovanni and Bos, Herbert and Razavi, Kaveh and Giuffrida, Cristiano},
+  booktitle={Proceedings of the 2016 ACM SIGSAC conference on computer and communications security},
+  pages={1675--1689},
+  year={2016}
+}
+
+@inproceedings{razavi2016flip,
+  title={Flip feng shui: Hammering a needle in the software stack},
+  author={Razavi, Kaveh and Gras, Ben and Bosman, Erik and Preneel, Bart and Giuffrida, Cristiano and Bos, Herbert},
+  booktitle={25th USENIX Security Symposium (USENIX Security 16)},
+  pages={1--18},
+  year={2016}
+}
+
+@inproceedings{kwong2020rambleed,
+  title={Rambleed: Reading bits in memory without accessing them},
+  author={Kwong, Andrew and Genkin, Daniel and Gruss, Daniel and Yarom, Yuval},
+  booktitle={2020 IEEE Symposium on Security and Privacy (SP)},
+  pages={695--711},
+  year={2020},
+  organization={IEEE}
+}
+
+@inproceedings{jang2017sgx,
+  title={SGX-Bomb: Locking down the processor via Rowhammer attack},
+  author={Jang, Yeongjin and Lee, Jaehyuk and Lee, Sangho and Kim, Taesoo},
+  booktitle={Proceedings of the 2nd Workshop on System Software for Trusted Execution},
+  pages={1--6},
+  year={2017}
+}
+
+@inproceedings{gruss2016rowhammer,
+  title={Rowhammer. js: A remote software-induced fault attack in javascript},
+  author={Gruss, Daniel and Maurice, Cl{\'e}mentine and Mangard, Stefan},
+  booktitle={International conference on detection of intrusions and malware, and vulnerability assessment},
+  pages={300--321},
+  year={2016},
+  organization={Springer}
+}
+
+@inproceedings{tatar2018throwhammer,
+  title={Throwhammer: Rowhammer attacks over the network and defenses},
+  author={Tatar, Andrei and Konoth, Radhesh Krishnan and Athanasopoulos, Elias and Giuffrida, Cristiano and Bos, Herbert and Razavi, Kaveh},
+  booktitle={2018 USENIX Annual Technical Conference (USENIX ATC 18)},
+  pages={213--226},
+  year={2018}
+}
+
+% ----------- Mitigations -----------
+@inproceedings{brasser2017can,
+  title={$\{$CAn’t$\}$ touch this: Software-only mitigation against rowhammer attacks targeting kernel memory},
+  author={Brasser, Ferdinand and Davi, Lucas and Gens, David and Liebchen, Christopher and Sadeghi, Ahmad-Reza},
+  booktitle={26th USENIX Security Symposium (USENIX Security 17)},
+  pages={117--130},
+  year={2017}
+}
+
+@article{aweke2016anvil,
+  title={ANVIL: Software-based protection against next-generation rowhammer attacks},
+  author={Aweke, Zelalem Birhanu and Yitbarek, Salessawi Ferede and Qiao, Rui and Das, Reetuparna and Hicks, Matthew and Oren, Yossi and Austin, Todd},
+  journal={ACM SIGPLAN Notices},
+  volume={51},
+  number={4},
+  pages={743--755},
+  year={2016},
+  publisher={ACM New York, NY, USA}
+}
+
+@misc{kim2020revisiting,
+  title={Revisiting rowhammer: An experimental analysis of modern dram devices and mitigation techniques. In 2020 ACM/IEEE 47th Annual International Symposium on Computer Architecture (ISCA)},
+  author={Kim, Jeremie S and Patel, Minesh and Ya{\u{g}}l{\i}k{\c{c}}{\i}, A Giray and Hassan, Hasan and Azizi, Roknoddin and Orosa, Lois and Mutlu, Onur},
+  year={2020},
+  publisher={IEEE}
+}
+
+@inproceedings{marazzi2023rega,
+  title={Rega: Scalable rowhammer mitigation with refresh-generating activations},
+  author={Marazzi, Michele and Solt, Flavien and Jattke, Patrick and Takashi, Kubo and Razavi, Kaveh},
+  booktitle={2023 IEEE Symposium on Security and Privacy (SP)},
+  pages={1684--1701},
+  year={2023},
+  organization={IEEE}
+}
+
+% ----------- Bypassing Mitigations -----------
+@inproceedings{de2021smash,
+  title={$\{$SMASH$\}$: Synchronized many-sided rowhammer attacks from $\{$JavaScript$\}$},
+  author={De Ridder, Finn and Frigo, Pietro and Vannacci, Emanuele and Bos, Herbert and Giuffrida, Cristiano and Razavi, Kaveh},
+  booktitle={30th USENIX Security Symposium (USENIX Security 21)},
+  pages={1001--1018},
+  year={2021}
+}
+@inproceedings{jattke2022blacksmith,
+  title={Blacksmith: Scalable rowhammering in the frequency domain},
+  author={Jattke, Patrick and Van Der Veen, Victor and Frigo, Pietro and Gunter, Stijn and Razavi, Kaveh},
+  booktitle={2022 IEEE Symposium on Security and Privacy (SP)},
+  pages={716--734},
+  year={2022},
+  organization={IEEE}
+}
+@inproceedings{jattke2024zenhammer,
+  title={$\{$ZenHammer$\}$: Rowhammer Attacks on $\{$AMD$\}$ Zen-based Platforms},
+  author={Jattke, Patrick and Wipfli, Max and Solt, Flavien and Marazzi, Michele and B{\"o}lcskei, Matej and Razavi, Kaveh},
+  booktitle={33rd USENIX Security Symposium (USENIX Security 24)},
+  pages={1615--1633},
+  year={2024}
+}
+@misc{meyer2026phoenix,
+  title={Phoenix: Rowhammer Attacks on DDR5 with Self-Correcting Synchronization},
+  author={Meyer, Diego and Jattke, Patrick and Marazzi, Michele and Qazi, Salman and Moghimi, Daniel and Razavi, Kaveh},
+  journal={S\&P},
+  year={2026}
+}
+@inproceedings{frigo2020trrespass,
+  title={TRRespass: Exploiting the many sides of target row refresh},
+  author={Frigo, Pietro and Vannacc, Emanuele and Hassan, Hasan and Van Der Veen, Victor and Mutlu, Onur and Giuffrida, Cristiano and Bos, Herbert and Razavi, Kaveh},
+  booktitle={2020 IEEE Symposium on Security and Privacy (SP)},
+  pages={747--762},
+  year={2020},
+  organization={IEEE}
+}
+@inproceedings{hassan2021uncovering,
+  title={Uncovering in-dram rowhammer protection mechanisms: A new methodology, custom rowhammer patterns, and implications},
+  author={Hassan, Hasan and Tugrul, Yahya Can and Kim, Jeremie S and Van der Veen, Victor and Razavi, Kaveh and Mutlu, Onur},
+  booktitle={MICRO-54: 54th Annual IEEE/ACM International Symposium on Microarchitecture},
+  pages={1198--1213},
+  year={2021}
+}
+
+% ----------- Basic Power Analysis -----------
+@article{lou2021survey,
+  title={A survey of microarchitectural side-channel vulnerabilities, attacks, and defenses in cryptography},
+  author={Lou, Xiaoxuan and Zhang, Tianwei and Jiang, Jun and Zhang, Yinqian},
+  journal={ACM Computing Surveys (CSUR)},
+  volume={54},
+  number={6},
+  pages={1--37},
+  year={2021},
+  publisher={ACM New York, NY, USA}
+}
+@inproceedings{kocher1999differential,
+  title={Differential power analysis},
+  author={Kocher, Paul and Jaffe, Joshua and Jun, Benjamin},
+  booktitle={Annual international cryptology conference},
+  pages={388--397},
+  year={1999},
+  organization={Springer}
+}
+@inproceedings{zhang2021red,
+  title={Red alert for power leakage: Exploiting intel rapl-induced side channels},
+  author={Zhang, Zhenkai and Liang, Sisheng and Yao, Fan and Gao, Xing},
+  booktitle={Proceedings of the 2021 ACM Asia Conference on Computer and Communications Security},
+  pages={162--175},
+  year={2021}
+}
+@inproceedings{lipp2021platypus,
+  title={PLATYPUS: Software-based power side-channel attacks on x86},
+  author={Lipp, Moritz and Kogler, Andreas and Oswald, David and Schwarz, Michael and Easdon, Catherine and Canella, Claudio and Gruss, Daniel},
+  booktitle={2021 IEEE Symposium on Security and Privacy (SP)},
+  pages={355--371},
+  year={2021},
+  organization={IEEE}
+}
+@inproceedings{botvinnik2023finger,
+  title={The finger in the power: How to fingerprint pcs by monitoring their power consumption},
+  author={Botvinnik, Marina and Laor, Tomer and Rokicki, Thomas and Maurice, Cl{\'e}mentine and Oren, Yossi},
+  booktitle={International Conference on Detection of Intrusions and Malware, and Vulnerability Assessment},
+  pages={24--45},
+  year={2023},
+  organization={Springer}
+}
+
+% ----------- Remote Power Analysis -----------
+@inproceedings{pessl2016drama,
+  title={$\{$DRAMA$\}$: Exploiting $\{$DRAM$\}$ addressing for $\{$Cross-CPU$\}$ attacks},
+  author={Pessl, Peter and Gruss, Daniel and Maurice, Cl{\'e}mentine and Schwarz, Michael and Mangard, Stefan},
+  booktitle={25th USENIX security symposium (USENIX security 16)},
+  pages={565--581},
+  year={2016}
+}
+@inproceedings{wang2022hertzbleed,
+  title={Hertzbleed: Turning power $\{$Side-Channel$\}$ attacks into remote timing attacks on x86},
+  author={Wang, Yingchen and Paccagnella, Riccardo and He, Elizabeth Tang and Shacham, Hovav and Fletcher, Christopher W and Kohlbrenner, David},
+  booktitle={31st USENIX Security Symposium (USENIX Security 22)},
+  pages={679--697},
+  year={2022}
+}
+@inproceedings{cohen2022hammerscope,
+  title={HammerScope: Observing DRAM power consumption using Rowhammer},
+  author={Cohen, Yaakov and Tharayil, Kevin Sam and Haenel, Arie and Genkin, Daniel and Keromytis, Angelos D and Oren, Yossi and Yarom, Yuval},
+  booktitle={Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security},
+  pages={547--561},
+  year={2022}
+}
+
+% ----------- Experiment Infrastructure -----------
+@inproceedings{hassan2017softmc,
+  title={SoftMC: A flexible and practical open-source infrastructure for enabling experimental DRAM studies},
+  author={Hassan, Hasan and Vijaykumar, Nandita and Khan, Samira and Ghose, Saugata and Chang, Kevin and Pekhimenko, Gennady and Lee, Donghyuk and Ergin, Oguz and Mutlu, Onur},
+  booktitle={2017 IEEE International Symposium on High Performance Computer Architecture (HPCA)},
+  pages={241--252},
+  year={2017},
+  organization={IEEE}
+}
+@article{olgun2023dram,
+  title={DRAM bender: An extensible and versatile FPGA-based infrastructure to easily test state-of-the-art DRAM chips},
+  author={Olgun, Ataberk and Hassan, Hasan and Ya{\u{g}}l{\i}k{\c{c}}{\i}, A Giray and Tu{\u{g}}rul, Yahya Can and Orosa, Lois and Luo, Haocong and Patel, Minesh and Ergin, O{\u{g}}uz and Mutlu, Onur},
+  journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems},
+  volume={42},
+  number={12},
+  pages={5098--5112},
+  year={2023},
+  publisher={IEEE}
+}
+@inproceedings{jattke2025mcsee,
+  title={$\{$McSee$\}$: Evaluating Advanced Rowhammer Attacks and Defenses via Automated $\{$DRAM$\}$ Traffic Analysis},
+  author={Jattke, Patrick and Marazzi, Michele and Solt, Flavien and Wipfli, Max and Gloor, Stefan and Razavi, Kaveh},
+  booktitle={34th USENIX Security Symposium (USENIX Security 25)},
+  pages={5621--5640},
+  year={2025}
+}
+@inproceedings{gloor2025refault,
+  title={REFault: A Fault Injection Platform for Rowhammer Research on DDR5 Memory},
+  author={Gloor, Stefan and Jattke, Patrick and Razavi, Kaveh},
+  booktitle={Proceedings of the Microarchitecture Security Conference},
+  year={2025}
+}

@@ -1,0 +1,29 @@
+{
+  "editor.quickSuggestions": false,
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.wordBasedSuggestions": "off",
+  "editor.inlineSuggest.enabled": false,
+  "editor.tabCompletion": "off",
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "editor.snippetSuggestions": "none",
+  "latex-workshop.intellisense.package.enabled": false,
+  "latex-workshop.intellisense.citation.enabled": false,
+  "latex-workshop.intellisense.reference.enabled": false,
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.recipe.default": "first",
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.tab.editorGroup": "right",
+  "github.copilot.enable": {
+    "*": false
+  },
+  "cSpell.enabled": true,
+  "cSpell.enableFiletypes": [
+    "latex",
+    "tex"
+  ],
+  "ltex.enabled": [
+    "latex",
+    "tex"
+  ]
+}
