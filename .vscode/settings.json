@@ -14,16 +14,26 @@
   "latex-workshop.latex.recipe.default": "first",
   "latex-workshop.view.pdf.viewer": "tab",
   "latex-workshop.view.pdf.tab.editorGroup": "right",
-  "github.copilot.enable": {
-    "*": false
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
   },
+
+  "editor.suggestOnTriggerCharacters": true,
+  "editor.inlineSuggest.enabled": false,
+  "editor.snippetSuggestions": "inline",
+  "editor.acceptSuggestionOnEnter": "on", 
+  "latex-workshop.intellisense.enabled": true,
+  "latex-workshop.hover.enabled": true,
+
   "cSpell.enabled": true,
+  "cSpell.language": "en",
+  "cSpell.showSuggestions": true,
+
   "cSpell.enableFiletypes": [
     "latex",
-    "tex"
-  ],
-  "ltex.enabled": [
-    "latex",
-    "tex"
+    "plaintext",
+    "markdown"
   ]
 }
