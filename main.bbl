@@ -15,6 +15,12 @@ A.~Zou, Z.~Wang, N.~Carlini, M.~Nasr, J.~Z. Kolter, and M.~Fredrikson, ``Univers
 \bibitem{shi2024judgedeceiver}
 J.~Shi, Z.~Yuan, Y.~Liu, Y.~Huang, P.~Zhou, L.~Sun, and N.~Z. Gong, ``Optimization-based prompt injection attack to llm-as-a-judge,'' in {\em Proceedings of the 2024 on ACM SIGSAC Conference on Computer and Communications Security}, CCS '24, (New York, NY, USA), pp.~660--674, Association for Computing Machinery, 2024.
 
+\bibitem{learningtoinject2026}
+X.~Chen, J.~Zhang, and F.~Tram{\`e}r, ``Learning to inject: Automated prompt injection via reinforcement learning,'' 2026.
+
+\bibitem{verifiableagenttoagent2026}
+S.~Nellessen and T.~Kachman, ``David vs. goliath: Verifiable agent-to-agent jailbreaking via reinforcement learning,'' 2026.
+
 \bibitem{yao2024survey}
 Y.~Yao, J.~Duan, K.~Xu, Y.~Cai, Z.~Sun, and Y.~Zhang, ``A survey on large language model (llm) security and privacy: The good, the bad, and the ugly,'' {\em High-Confidence Computing}, vol.~4, no.~2, p.~100211, 2024.
 
