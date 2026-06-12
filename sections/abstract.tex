@@ -1,0 +1,21 @@
+\begin{abstract}
+Large language model (LLM) agents are increasingly augmented with tools,
+persistent memory, retrieval components, and the ability to communicate with
+other agents, which extends their capabilities but also broadens their attack
+surface. This is particularly true for multi-agent systems, where sensitive
+information can propagate through internal channels -- messages between
+agents, tool arguments, memory writes, and logs -- before, or even without,
+reaching the final user-facing output. This project proposes an
+AutoResearch-driven red-teaming methodology for agentic and multi-agent LLM
+systems, in which an LLM agent iteratively proposes attack variants, evaluates
+them against a target system on a fixed task, scores the outcome, and retains
+improving variants. We instantiate two independent optimization loops, one
+maximizing synthetic sensitive-information exposure and the other maximizing
+task-utility degradation and operational-cost amplification, and evaluate them
+across AgentDojo and three multi-agent frameworks: AutoGen, CrewAI, and
+LangGraph. By measuring both final-output and internal-channel leakage,
+utility degradation, cost amplification, and cross-framework transferability,
+we aim to determine whether automatically optimized attacks outperform random
+and manually designed baselines, and whether attacks discovered on one
+framework generalize to others.
+\end{abstract}

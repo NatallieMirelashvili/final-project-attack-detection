@@ -3,44 +3,51 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
 The style file: ieeetr.bst
 Database file #1: bib/references.bib
-You've used 17 entries,
+Warning--entry type for "crewai" isn't style-file defined
+--line 203 of file bib/references.bib
+Warning--entry type for "langgraph" isn't style-file defined
+--line 213 of file bib/references.bib
+Warning--entry type for "autoresearch" isn't style-file defined
+--line 224 of file bib/references.bib
+You've used 22 entries,
             1876 wiz_defined-function locations,
-            562 strings with 7266 characters,
-and the built_in function-call counts, 4157 in all, are:
-= -- 334
-> -- 279
+            591 strings with 8488 characters,
+and the built_in function-call counts, 5694 in all, are:
+= -- 477
+> -- 355
 < -- 0
-+ -- 99
-- -- 82
-* -- 311
-:= -- 632
-add.period$ -- 18
-call.type$ -- 17
-change.case$ -- 17
++ -- 127
+- -- 105
+* -- 430
+:= -- 850
+add.period$ -- 23
+call.type$ -- 22
+change.case$ -- 22
 chr.to.int$ -- 0
-cite$ -- 17
-duplicate$ -- 174
-empty$ -- 396
-format.name$ -- 82
-if$ -- 980
+cite$ -- 22
+duplicate$ -- 246
+empty$ -- 534
+format.name$ -- 105
+if$ -- 1345
 int.to.chr$ -- 0
-int.to.str$ -- 17
-missing$ -- 8
-newline$ -- 55
-num.names$ -- 17
-pop$ -- 90
+int.to.str$ -- 22
+missing$ -- 12
+newline$ -- 70
+num.names$ -- 22
+pop$ -- 109
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 127
+skip$ -- 181
 stack$ -- 0
-substring$ -- 148
-swap$ -- 54
+substring$ -- 260
+swap$ -- 86
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
-while$ -- 30
-width$ -- 19
-write$ -- 153
+while$ -- 44
+width$ -- 24
+write$ -- 200
+(There were 3 warnings)
