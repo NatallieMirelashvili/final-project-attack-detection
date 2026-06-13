@@ -9,45 +9,45 @@ Warning--entry type for "langgraph" isn't style-file defined
 --line 213 of file bib/references.bib
 Warning--entry type for "autoresearch" isn't style-file defined
 --line 224 of file bib/references.bib
-You've used 22 entries,
+You've used 16 entries,
             1876 wiz_defined-function locations,
-            591 strings with 8488 characters,
-and the built_in function-call counts, 5694 in all, are:
-= -- 477
-> -- 355
+            556 strings with 7250 characters,
+and the built_in function-call counts, 4102 in all, are:
+= -- 322
+> -- 290
 < -- 0
-+ -- 127
-- -- 105
-* -- 430
-:= -- 850
-add.period$ -- 23
-call.type$ -- 22
-change.case$ -- 22
++ -- 103
+- -- 87
+* -- 320
+:= -- 632
+add.period$ -- 17
+call.type$ -- 16
+change.case$ -- 16
 chr.to.int$ -- 0
-cite$ -- 22
-duplicate$ -- 246
-empty$ -- 534
-format.name$ -- 105
-if$ -- 1345
+cite$ -- 16
+duplicate$ -- 168
+empty$ -- 374
+format.name$ -- 87
+if$ -- 954
 int.to.chr$ -- 0
-int.to.str$ -- 22
-missing$ -- 12
-newline$ -- 70
-num.names$ -- 22
-pop$ -- 109
+int.to.str$ -- 16
+missing$ -- 8
+newline$ -- 52
+num.names$ -- 16
+pop$ -- 85
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 181
+skip$ -- 121
 stack$ -- 0
-substring$ -- 260
-swap$ -- 86
+substring$ -- 156
+swap$ -- 56
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
-while$ -- 44
-width$ -- 24
-write$ -- 200
+while$ -- 29
+width$ -- 18
+write$ -- 142
 (There were 3 warnings)

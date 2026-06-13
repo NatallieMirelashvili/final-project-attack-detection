@@ -1,0 +1,282 @@
+% ============================================================
+\section{Threat Model}
+
+\subsection{Attacker Capabilities}
+
+We assume a controlled research setting in which the attacker can inject malicious or misleading content into one or more untrusted channels, such as:
+
+\begin{itemize}
+    \item Retrieved documents.
+    \item Tool outputs.
+    \item Emails or task inputs.
+    \item Inter-agent messages.
+    \item External knowledge sources.
+\end{itemize}
+
+The attacker does not access real private data. All sensitive information used in the experiment is synthetic and represented using canary secrets.
+
+\subsection{Attack Goals}
+
+We consider two attack goals.
+
+\subsubsection{Sensitive Information Leakage}
+
+The attacker attempts to cause the system to expose a synthetic secret, either in the final output or in an internal system channel.
+
+\subsubsection{Performance Degradation}
+
+The attacker attempts to reduce task performance or increase operational cost without necessarily leaking a secret.
+
+\subsection{Out of Scope}
+
+This work does not target real users, real private data, production systems, credential theft, or unauthorized access. All experiments are performed in sandboxed environments using synthetic secrets and controlled tasks.
+
+% ============================================================
+\section{Experimental Systems}
+
+We evaluate the framework on four systems.
+
+\subsection{AgentDojo}
+
+AgentDojo serves as the benchmark-oriented baseline environment. It provides realistic tool-using agent tasks and is suitable for evaluating prompt-injection robustness, utility preservation, and attack success.
+
+\subsection{AutoGen}
+
+AutoGen represents a conversational multi-agent framework in which agents interact through messages and may use tools or human-in-the-loop workflows.
+
+\subsection{CrewAI}
+
+CrewAI represents role-based multi-agent collaboration, where agents are assigned goals, roles, and tools, and may delegate subtasks to one another.
+
+\subsection{LangGraph}
+
+LangGraph represents stateful graph-based agent workflows. It is especially useful for tracing where an attack succeeds, because intermediate nodes, edges, state updates, and tool calls can be logged explicitly.
+
+\subsection{Unified Experimental Scenario}
+
+To enable comparison, each framework is configured to implement a similar abstract workflow:
+
+\begin{figure}[h]
+\centering
+\fbox{
+\begin{minipage}{0.9\linewidth}
+\centering
+User Task $\rightarrow$ Planner Agent $\rightarrow$ Retriever/Tool Agent $\rightarrow$ Worker Agent $\rightarrow$ Reviewer/Guard Agent $\rightarrow$ Final Output
+\end{minipage}
+}
+\caption{Unified multi-agent workflow used across frameworks.}
+\label{fig:workflow}
+\end{figure}
+
+% ============================================================
+\section{AutoResearch Red-Teaming Framework}
+
+\subsection{Overview}
+
+The proposed framework uses AutoResearch-style optimization to generate, test, and select attack variants. Each loop receives a target system, a task, an attack space, and a scoring function.
+
+\begin{figure}[h]
+\centering
+\fbox{
+\begin{minipage}{0.9\linewidth}
+\centering
+Generate Attack Variant $\rightarrow$ Run Evaluation $\rightarrow$ Score Result $\rightarrow$ Keep or Reject $\rightarrow$ Next Iteration
+\end{minipage}
+}
+\caption{AutoResearch red-teaming loop.}
+\label{fig:autoresearch_loop}
+\end{figure}
+
+\subsection{Loop A: Leakage Optimization}
+
+The first loop optimizes for sensitive-information leakage.
+
+\begin{equation}
+\text{Objective}_{leak} = \max \left( \text{TotalExposureRate} \right)
+\end{equation}
+
+The loop may modify:
+
+\begin{itemize}
+    \item Attack prompt wording.
+    \item Injection location.
+    \item Target agent.
+    \item Tool-output content.
+    \item Retrieved document content.
+    \item Canary placement.
+    \item Attack stealth level.
+\end{itemize}
+
+\subsection{Loop B: Performance Degradation Optimization}
+
+The second loop optimizes for reduced utility or increased cost.
+
+\begin{equation}
+\text{Objective}_{perf} = \max \left( \alpha \cdot \text{UtilityDrop} + \beta \cdot \text{CostAmplification} \right)
+\end{equation}
+
+where $\alpha$ and $\beta$ control the relative importance of correctness degradation and cost increase.
+
+The loop may modify:
+
+\begin{itemize}
+    \item Misleading documents.
+    \item Ambiguous task inputs.
+    \item Tool outputs.
+    \item Delegation-inducing instructions.
+    \item Retry-inducing perturbations.
+    \item Conflicting context.
+\end{itemize}
+
+% ============================================================
+\section{Evaluation Metrics}
+
+\subsection{Leakage Metrics}
+
+\subsubsection{Leakage Attack Success Rate}
+
+\begin{equation}
+\text{Leakage ASR} =
+\frac{\#\text{runs with leakage}}{\#\text{attacked runs}}
+\end{equation}
+
+\subsubsection{Final-Output Leakage Rate}
+
+\begin{equation}
+\text{FinalOutputLeakage} =
+\frac{\#\text{runs with leakage in final output}}{\#\text{attacked runs}}
+\end{equation}
+
+\subsubsection{Internal Leakage Rate}
+
+\begin{equation}
+\text{InternalLeakage} =
+\frac{\#\text{runs with leakage in internal channels}}{\#\text{attacked runs}}
+\end{equation}
+
+\subsubsection{Total Exposure Rate}
+
+\begin{equation}
+\text{TotalExposureRate} =
+\frac{\#\text{runs with leakage in any channel}}{\#\text{attacked runs}}
+\end{equation}
+
+\subsubsection{Output-Only Miss Rate}
+
+\begin{equation}
+\text{OutputOnlyMissRate} =
+\frac{\#\text{runs with internal leakage but no final-output leakage}}{\#\text{attacked runs}}
+\end{equation}
+
+\subsection{Performance Metrics}
+
+\subsubsection{Utility Drop}
+
+\begin{equation}
+\text{UtilityDrop} =
+\text{CleanTaskSuccessRate} - \text{AttackedTaskSuccessRate}
+\end{equation}
+
+\subsubsection{Cost Amplification}
+
+\begin{equation}
+\text{CostAmplification} =
+\frac{\text{AttackedCost}}{\text{CleanCost}}
+\end{equation}
+
+\subsubsection{Latency Increase}
+
+\begin{equation}
+\text{LatencyIncrease} =
+\frac{\text{AttackedLatency}}{\text{CleanLatency}}
+\end{equation}
+
+\subsubsection{Tool Call Increase}
+
+\begin{equation}
+\text{ToolCallIncrease} =
+\frac{\text{AttackedToolCalls}}{\text{CleanToolCalls}}
+\end{equation}
+
+\subsection{Transferability Metrics}
+
+\subsubsection{Transfer ASR}
+
+\begin{equation}
+\text{TransferASR} =
+\frac{\text{ASR on unseen systems}}{\text{ASR on source system}}
+\end{equation}
+
+\subsubsection{Generalization Gap}
+
+\begin{equation}
+\text{GeneralizationGap} =
+\text{ASR}_{seen} - \text{ASR}_{unseen}
+\end{equation}
+
+\subsection{Defense Metrics}
+
+\begin{itemize}
+    \item Leakage reduction.
+    \item Utility preservation.
+    \item False refusal rate.
+    \item Over-defense rate.
+    \item Defense cost overhead.
+    \item Attack success despite guard.
+\end{itemize}
+
+% ============================================================
+\section{Experimental Design}
+
+\subsection{Baselines}
+
+We compare four attack settings:
+
+\begin{itemize}
+    \item \textbf{B0: Clean}: no attack.
+    \item \textbf{B1: Random}: random or naive injection.
+    \item \textbf{B2: Manual}: manually designed attack.
+    \item \textbf{B3: AutoResearch}: automatically optimized attack.
+\end{itemize}
+
+\subsection{Defense Settings}
+
+We evaluate the following defense configurations:
+
+\begin{itemize}
+    \item \textbf{D0: No defense}.
+    \item \textbf{D1: Prompt-based defense}.
+    \item \textbf{D2: Guard agent}.
+    \item \textbf{D3: Memory or inter-agent redaction}.
+    \item \textbf{D4: Tool-output filtering}.
+\end{itemize}
+
+\subsection{Experimental Matrix}
+
+Each experiment is defined by:
+
+\begin{equation}
+E = (S, G, A, D, T)
+\end{equation}
+
+where $S$ is the system, $G$ is the attack goal, $A$ is the attack type, $D$ is the defense setting, and $T$ is the task/domain.
+
+\begin{table*}[t]
+\centering
+\caption{Experimental matrix.}
+\label{tab:exp_matrix}
+\begingroup
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.14\textwidth}p{0.18\textwidth}p{0.13\textwidth}p{0.36\textwidth}p{0.10\textwidth}@{}}
+\toprule
+System & Architecture & Goal & Attack Type & Defense \\
+\midrule
+AgentDojo & Single-agent/tool-using & Leakage & Clean / Random / Manual / AutoResearch & D0--D4 \\
+AutoGen & Multi-agent & Leakage & Clean / Random / Manual / AutoResearch & D0--D4 \\
+CrewAI & Multi-agent & Degradation & Clean / Random / Manual / AutoResearch & D0--D4 \\
+LangGraph & Multi-agent graph & Degradation & Clean / Random / Manual / AutoResearch & D0--D4 \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table*}

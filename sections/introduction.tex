@@ -4,14 +4,13 @@ Large language model (LLM)-based agents are increasingly used for tasks that go
 beyond single-turn question answering: they call external tools and APIs,
 retrieve and incorporate documents, read and write persistent memory, and plan
 a sequence of actions toward a goal. In multi-agent systems, several such
-agents are composed into a single pipeline for example, a planner that
+agents are composed into a single pipeline, for example, a planner that
 decomposes the task, a retriever or tool-using agent that gathers external
 information, a worker agent that carries out the core task, and a reviewer or
-guard agent that checks the result before it is returned to the user. This
-decomposition improves modularity and, often, task performance, but it also
-creates internal communication channels -- inter-agent messages, tool-call
-arguments, memory writes, and logs that are not directly visible to the end
-user.
+guard agent that checks the result before it is returned to the user. 
+\\Although this decomposition improves modularity and often enhances task performance, 
+it also introduces internal communication channels, such as inter-agent messages, tool-call arguments, memory writes, and logs, 
+that are not directly visible to the end user.
 
 Existing evaluations of prompt-injection robustness for LLM-integrated systems
 typically focus on whether the final, user-facing response leaks sensitive
@@ -44,7 +43,7 @@ across four systems -- AgentDojo, AutoGen, CrewAI, and LangGraph, configured
 with a shared abstract pipeline so that results are comparable across
 frameworks. Throughout, the attacker only injects content into untrusted
 channels (retrieved documents, tool outputs, task inputs, inter-agent
-messages). no real user data is involved, and all sensitive information is
+messages), no real user data is involved and all sensitive information is
 represented by synthetic canary secrets in sandboxed tasks.
 
 \subsection{Agentic and Multi-Agent LLM Systems}

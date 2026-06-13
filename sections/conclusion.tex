@@ -1,0 +1,41 @@
+% ============================================================
+\section{Discussion}
+
+\subsection{Final Output vs. Internal Exposure}
+
+This section discusses whether final-output-only evaluation misses important leakage channels. We expect this gap to be especially relevant in multi-agent systems, where internal messages and tool arguments may expose sensitive information even when the final answer is safe.
+
+\subsection{AutoResearch vs. Manual Attacks}
+
+This section compares whether AutoResearch-optimized attacks outperform manual and random baselines.
+
+\subsection{Transferability Across Frameworks}
+
+This section analyzes whether attack variants optimized on one framework generalize to other frameworks, domains, or defense settings.
+
+\subsection{Security-Utility Tradeoff}
+
+This section analyzes whether defenses reduce leakage without significantly degrading task utility or increasing operational cost.
+
+% ============================================================
+\section{Limitations}
+
+This work has several limitations:
+
+\begin{itemize}
+    \item The experiments use synthetic secrets rather than real private data.
+    \item Framework implementations may not reflect all production deployments.
+    \item AutoResearch search quality depends on the defined attack space and scoring function.
+    \item Some semantic leakage may be difficult to detect using exact canary matching alone.
+    \item Results may vary across LLM providers and model versions.
+\end{itemize}
+
+% ============================================================
+\section{Ethical Considerations}
+
+All experiments are conducted in controlled environments using synthetic data. No real user data, credentials, private documents, or production systems are targeted. The goal of this work is to improve the evaluation and defense of agentic and multi-agent systems.
+
+% ============================================================
+\section{Conclusion}
+
+This paper proposes an AutoResearch-driven methodology for automated red teaming of agentic and multi-agent systems. The framework evaluates both sensitive-information leakage and performance degradation, while measuring transferability across AgentDojo, AutoGen, CrewAI, and LangGraph. By inspecting both final outputs and internal channels, the proposed evaluation aims to reveal exposure that output-only testing may miss. The expected outcome is a systematic framework for comparing vulnerabilities, defenses, and generalization behavior across modern agent architectures.

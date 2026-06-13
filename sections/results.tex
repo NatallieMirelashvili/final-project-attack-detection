@@ -1,0 +1,81 @@
+% ============================================================
+\section{Results}
+
+This section will present the empirical results.
+
+\subsection{Leakage Results}
+
+\begin{table*}[t]
+\centering
+\caption{Sensitive-information leakage results.}
+\label{tab:leakage_results}
+\begin{tabular}{llrrrrr}
+\toprule
+System & Attack & Leakage ASR & Final Output & Internal Leakage & Total Exposure & Output-Only Miss \\
+\midrule
+AgentDojo & Random & TODO & TODO & TODO & TODO & TODO \\
+AgentDojo & Manual & TODO & TODO & TODO & TODO & TODO \\
+AgentDojo & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+AutoGen & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+CrewAI & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+LangGraph & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Performance Degradation Results}
+
+\begin{table*}[t]
+\centering
+\caption{Performance degradation results.}
+\label{tab:perf_results}
+\begin{tabular}{llrrrrr}
+\toprule
+System & Attack & Task Success & Utility Drop & Cost Amp. & Latency Inc. & Tool Call Inc. \\
+\midrule
+AgentDojo & Random & TODO & TODO & TODO & TODO & TODO \\
+AgentDojo & Manual & TODO & TODO & TODO & TODO & TODO \\
+AgentDojo & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+AutoGen & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+CrewAI & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+LangGraph & AutoResearch & TODO & TODO & TODO & TODO & TODO \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Transferability Results}
+
+\begin{table*}[t]
+\centering
+\caption{Cross-system transferability results.}
+\label{tab:transfer_results}
+\begin{tabular}{lllrr}
+\toprule
+Source System & Target System & Goal & Transfer ASR & Generalization Gap \\
+\midrule
+AgentDojo & LangGraph & Leakage & TODO & TODO \\
+AgentDojo & CrewAI & Leakage & TODO & TODO \\
+LangGraph & AutoGen & Leakage & TODO & TODO \\
+AgentDojo & LangGraph & Degradation & TODO & TODO \\
+LangGraph & CrewAI & Degradation & TODO & TODO \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Defense Results}
+
+\begin{table*}[t]
+\centering
+\caption{Defense evaluation.}
+\label{tab:defense_results}
+\begin{tabular}{llrrrr}
+\toprule
+System & Defense & Leakage Reduction & Utility Preservation & False Refusal & Cost Overhead \\
+\midrule
+AgentDojo & Prompt defense & TODO & TODO & TODO & TODO \\
+AgentDojo & Guard agent & TODO & TODO & TODO & TODO \\
+LangGraph & Redaction & TODO & TODO & TODO & TODO \\
+CrewAI & Tool filtering & TODO & TODO & TODO & TODO \\
+\bottomrule
+\end{tabular}
+\end{table*}
