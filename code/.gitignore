@@ -30,3 +30,20 @@ results/
 # OS
 .DS_Store
 Thumbs.db
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Type / lint caches
+.mypy_cache/
+.ruff_cache/
+
+# Local files
+*.tmp
