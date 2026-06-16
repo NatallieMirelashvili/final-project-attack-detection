@@ -1,0 +1,16 @@
+experiment_name: langgraph_external_attack_compare_manual
+system_name: langgraph_synthetic
+goal: external_leakage
+num_iterations: 12
+num_tasks: 8
+attack_generator: manual_baseline
+defense: no_defense
+calibration_profile: medium
+reward_profile: external_leakage
+finalizer_exposure_mode: tool_and_memory_summary
+output_dir: results
+random_seed: 42
+adapter_type: langgraph_synthetic
+adapter_config:
+  calibration_profile: medium
+  finalizer_exposure_mode: tool_and_memory_summary

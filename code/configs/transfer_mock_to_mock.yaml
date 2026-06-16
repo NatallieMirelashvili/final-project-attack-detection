@@ -1,0 +1,8 @@
+source_experiment: mock_leakage
+target_experiment: transfer_mock_target
+goal: leakage
+num_tasks: 5
+defense: no_defense
+random_seed: 42
+output_dir: results
+target_adapter_suffix: target

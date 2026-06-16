@@ -1,0 +1,19 @@
+experiment_name: agentdojo_attack_compare_manual
+system_name: agentdojo
+goal: leakage
+num_iterations: 8
+num_tasks: 8
+attack_generator: manual_baseline
+defense: no_defense
+calibration_profile: medium
+scoring_weights:
+  total_exposure_rate: 1.0
+  internal_leakage_rate: 0.5
+  final_output_leakage_rate: 0.5
+  utility_drop: -0.2
+output_dir: results
+random_seed: 101
+adapter_type: agentdojo
+adapter_config:
+  agentdojo_mock_mode: true
+  calibration_profile: medium

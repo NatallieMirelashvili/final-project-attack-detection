@@ -1,0 +1,20 @@
+# AgentDojo degradation experiment (mock mode — no AgentDojo install required).
+# To use real AgentDojo: set agentdojo_mock_mode: false and install AgentDojo per official docs.
+experiment_name: agentdojo_degradation
+system_name: agentdojo
+goal: degradation
+num_iterations: 5
+num_tasks: 5
+attack_generator: auto_research
+defense: no_defense
+scoring_weights:
+  utility_drop: 1.0
+  cost_amplification: 0.3
+  latency_increase: 0.2
+  tool_call_increase: 0.2
+output_dir: results
+random_seed: 42
+adapter_type: agentdojo
+adapter_config:
+  agentdojo_mock_mode: true
+  suite_name: default

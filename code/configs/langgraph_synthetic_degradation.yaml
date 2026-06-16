@@ -1,0 +1,16 @@
+experiment_name: langgraph_synthetic_degradation
+system_name: langgraph_synthetic
+goal: degradation
+num_iterations: 5
+num_tasks: 5
+attack_generator: auto_research
+defense: no_defense
+scoring_weights:
+  utility_drop: 1.0
+  cost_amplification: 0.3
+  latency_increase: 0.2
+  tool_call_increase: 0.2
+output_dir: results
+random_seed: 42
+adapter_type: langgraph_synthetic
+adapter_config: {}

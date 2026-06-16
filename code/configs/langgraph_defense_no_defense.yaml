@@ -1,0 +1,18 @@
+experiment_name: langgraph_defense_no_defense
+system_name: langgraph_synthetic
+goal: leakage
+num_iterations: 6
+num_tasks: 8
+attack_generator: auto_research
+defense: no_defense
+calibration_profile: medium
+scoring_weights:
+  total_exposure_rate: 1.0
+  internal_leakage_rate: 0.5
+  final_output_leakage_rate: 0.5
+  utility_drop: -0.2
+output_dir: results
+random_seed: 202
+adapter_type: langgraph_synthetic
+adapter_config:
+  calibration_profile: medium

@@ -1,0 +1,10 @@
+source_experiment: agentdojo_leakage
+target_experiment: transfer_agentdojo_to_langgraph
+goal: leakage
+num_tasks: 5
+defense: no_defense
+random_seed: 42
+output_dir: results
+target_system_name: langgraph_synthetic
+target_adapter_suffix: from_agentdojo
+target_adapter_config: {}

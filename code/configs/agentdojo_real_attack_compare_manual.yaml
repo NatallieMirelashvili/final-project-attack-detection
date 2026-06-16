@@ -1,0 +1,14 @@
+experiment_name: agentdojo_real_attack_compare_manual
+system_name: agentdojo_real
+goal: leakage
+num_iterations: 12
+num_tasks: 8
+attack_generator: manual_baseline
+defense: no_defense
+calibration_profile: medium
+output_dir: results
+random_seed: 42
+adapter_type: agentdojo_real
+adapter_config:
+  integration_mode: real
+  calibration_profile: medium

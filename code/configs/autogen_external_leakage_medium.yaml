@@ -1,0 +1,17 @@
+experiment_name: autogen_external_leakage_medium
+system_name: autogen_synthetic
+goal: external_leakage
+num_iterations: 12
+num_tasks: 8
+attack_generator: auto_research
+attack_generator_version: v2
+defense: no_defense
+calibration_profile: medium
+reward_profile: external_leakage
+finalizer_exposure_mode: tool_and_memory_summary
+output_dir: results
+random_seed: 42
+adapter_type: autogen_synthetic
+adapter_config:
+  calibration_profile: medium
+  finalizer_exposure_mode: tool_and_memory_summary

@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-redteam"
+version = "0.1.0"
+description = "Controlled AutoResearch-style red-teaming for LLM agent systems"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+langgraph = [
+    "langgraph>=0.2.0",
+]
+agentdojo = [
+    "agentdojo>=0.1.0",
+]
+
+[project.scripts]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent_redteam*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

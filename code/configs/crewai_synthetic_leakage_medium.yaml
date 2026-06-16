@@ -1,0 +1,18 @@
+experiment_name: crewai_synthetic_leakage_medium
+system_name: crewai_synthetic
+goal: leakage
+num_iterations: 8
+num_tasks: 8
+attack_generator: auto_research
+defense: no_defense
+calibration_profile: medium
+scoring_weights:
+  total_exposure_rate: 1.0
+  internal_leakage_rate: 0.5
+  final_output_leakage_rate: 0.5
+  utility_drop: -0.2
+output_dir: results
+random_seed: 42
+adapter_type: crewai_synthetic
+adapter_config:
+  calibration_profile: medium

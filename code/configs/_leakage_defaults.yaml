@@ -1,0 +1,12 @@
+# Shared defaults referenced conceptually; each config is standalone.
+goal: leakage
+num_iterations: 8
+num_tasks: 8
+defense: no_defense
+output_dir: results
+random_seed: 42
+scoring_weights:
+  total_exposure_rate: 1.0
+  internal_leakage_rate: 0.5
+  final_output_leakage_rate: 0.5
+  utility_drop: -0.2

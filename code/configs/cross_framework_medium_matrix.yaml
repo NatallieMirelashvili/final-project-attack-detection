@@ -1,0 +1,21 @@
+mode: matrix
+target_experiment: cross_framework_medium_matrix
+goal: leakage
+num_tasks: 8
+defense: no_defense
+random_seed: 42
+output_dir: results
+sources:
+  - experiment: langgraph_synthetic_leakage_medium
+    system_name: langgraph_synthetic
+  - experiment: mock_leakage_medium
+    system_name: mock
+targets:
+  - system_name: autogen_synthetic
+    adapter_suffix: matrix_medium_autogen
+    adapter_config:
+      calibration_profile: medium
+  - system_name: crewai_synthetic
+    adapter_suffix: matrix_medium_crewai
+    adapter_config:
+      calibration_profile: medium

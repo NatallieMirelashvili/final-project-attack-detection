@@ -1,0 +1,10 @@
+source_experiment: langgraph_synthetic_leakage
+target_experiment: transfer_langgraph_to_autogen
+goal: leakage
+num_tasks: 5
+defense: no_defense
+random_seed: 42
+output_dir: results
+target_system_name: autogen_synthetic
+target_adapter_suffix: from_langgraph
+target_adapter_config: {}

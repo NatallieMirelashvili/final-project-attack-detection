@@ -1,0 +1,15 @@
+experiment_name: langgraph_real_attack_compare_auto_v1
+system_name: langgraph_real
+goal: leakage
+num_iterations: 12
+num_tasks: 8
+attack_generator: auto_research
+attack_generator_version: v1
+defense: no_defense
+calibration_profile: medium
+output_dir: results
+random_seed: 42
+adapter_type: langgraph_real
+adapter_config:
+  integration_mode: real
+  calibration_profile: medium
