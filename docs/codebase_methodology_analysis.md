@@ -1,6 +1,6 @@
 # Codebase Analysis for Methodology
 
-This document summarizes the implementation under the `code/` directory and is intended to support the Methodology section of the research paper.
+This document summarizes the implementation under the `code/` directory and is intended to support the Methodology section of the research paper. This document reflects the current implementation state and should be treated as a methodology snapshot, not as the final paper methodology. It may require updates as the codebase evolves.
 
 This document is derived from files under `code/` only. Where the implementation name suggests LLM-based behavior (e.g. "AutoResearch"), the code itself is inspected to determine what actually runs.
 
