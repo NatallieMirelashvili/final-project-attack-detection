@@ -487,9 +487,9 @@ DEGRADATION_SUMMARY_GROUP_FIELDS: List[str] = [
 DEGRADATION_SUMMARY_METRIC_FIELDS: List[str] = [
     "mean_utility_drop",
     "mean_cost_amplification",
-    "mean_latency_increase",
     "mean_tool_call_increase",
     "mean_retry_rate",
+    "mean_loop_or_failure_rate",
     "num_experiments",
 ]
 
@@ -705,10 +705,11 @@ def _filter_real_framework_rows(
     rows: List[Dict[str, Any]],
     system: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
+    real_modes = {"real", "controlled"}
     filtered = [
         r
         for r in rows
-        if r.get("integration_mode") == "real"
+        if r.get("integration_mode") in real_modes
         and r.get("calibration_profile") in ("medium", "hard")
         and r.get("calibration_profile") != "legacy"
     ]
@@ -818,17 +819,17 @@ def build_degradation_summary(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
     for group in groups.values():
         utility = [float(g.get("utility_drop", 0.0)) for g in group]
         cost = [float(g.get("cost_amplification", 0.0)) for g in group]
-        latency = [float(g.get("latency_increase", 0.0)) for g in group]
         tool_calls = [float(g.get("tool_call_increase", 0.0)) for g in group]
         retries = [float(g.get("retry_rate", 0.0)) for g in group]
+        loops = [float(g.get("loop_or_failure_rate", 0.0)) for g in group]
         base = {field: group[0].get(field) for field in DEGRADATION_SUMMARY_GROUP_FIELDS}
         base.update(
             {
                 "mean_utility_drop": statistics.mean(utility),
                 "mean_cost_amplification": statistics.mean(cost),
-                "mean_latency_increase": statistics.mean(latency),
                 "mean_tool_call_increase": statistics.mean(tool_calls),
                 "mean_retry_rate": statistics.mean(retries),
+                "mean_loop_or_failure_rate": statistics.mean(loops),
                 "num_experiments": len(group),
             }
         )

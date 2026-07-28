@@ -8,7 +8,9 @@ from agent_redteam.adapters.base import AgentSystemAdapter
 from agent_redteam.adapters.agentdojo_adapter import AgentDojoAdapter
 from agent_redteam.adapters.agentdojo_real_adapter import AgentDojoRealAdapter
 from agent_redteam.adapters.autogen_adapter import AutoGenSyntheticAdapter
+from agent_redteam.adapters.autogen_official_adapter import AutoGenOfficialAdapter
 from agent_redteam.adapters.crewai_adapter import CrewAISyntheticAdapter
+from agent_redteam.adapters.crewai_official_adapter import CrewAIOfficialAdapter
 from agent_redteam.adapters.langgraph_adapter import LangGraphSyntheticAdapter
 from agent_redteam.adapters.langgraph_real_adapter import LangGraphRealAdapter
 from agent_redteam.adapters.mock_adapter import MockAdapter
@@ -39,8 +41,12 @@ def create_adapter(
         adapter = LangGraphSyntheticAdapter()
     elif name in ("autogen_synthetic", "autogen"):
         adapter = AutoGenSyntheticAdapter()
+    elif name in ("autogen_official", "autogen_real"):
+        adapter = AutoGenOfficialAdapter()
     elif name in ("crewai_synthetic", "crewai"):
         adapter = CrewAISyntheticAdapter()
+    elif name in ("crewai_official", "crewai_real"):
+        adapter = CrewAIOfficialAdapter()
     else:
         adapter = MockAdapter()
 

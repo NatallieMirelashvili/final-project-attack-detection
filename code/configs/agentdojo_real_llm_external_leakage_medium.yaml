@@ -1,0 +1,17 @@
+experiment_name: agentdojo_real_llm_external_leakage_medium
+system_name: agentdojo_real
+goal: external_leakage
+num_iterations: 12
+num_tasks: 8
+attack_generator: auto_research
+attack_generator_version: v2
+defense: no_defense
+calibration_profile: medium
+reward_profile: external_leakage
+output_dir: results
+random_seed: 42
+adapter_type: agentdojo_real
+adapter_config:
+  integration_mode: llm
+  llm_mode: mock
+  calibration_profile: medium

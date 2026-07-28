@@ -1,0 +1,16 @@
+experiment_name: autogen_llm_leakage_medium
+system_name: autogen_synthetic
+goal: leakage
+num_iterations: 12
+num_tasks: 8
+attack_generator: auto_research
+attack_generator_version: v2
+defense: no_defense
+calibration_profile: medium
+output_dir: results
+random_seed: 42
+adapter_type: autogen_synthetic
+adapter_config:
+  integration_mode: llm
+  llm_mode: mock
+  calibration_profile: medium

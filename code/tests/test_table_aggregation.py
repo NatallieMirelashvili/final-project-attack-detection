@@ -481,7 +481,6 @@ calibration_profile: medium
 scoring_weights:
   utility_drop: 1.0
   cost_amplification: 0.3
-  latency_increase: 0.2
   tool_call_increase: 0.2
 output_dir: {output}
 random_seed: 42
@@ -537,7 +536,6 @@ calibration_profile: medium
 scoring_weights:
   utility_drop: 1.0
   cost_amplification: 0.3
-  latency_increase: 0.2
   tool_call_increase: 0.2
 output_dir: {output}
 random_seed: 42
@@ -573,7 +571,6 @@ calibration_profile: medium
 scoring_weights:
   utility_drop: 1.0
   cost_amplification: 0.3
-  latency_increase: 0.2
   tool_call_increase: 0.2
 output_dir: {output}
 random_seed: 42
@@ -637,7 +634,6 @@ calibration_profile: medium
 scoring_weights:
   utility_drop: 1.0
   cost_amplification: 0.3
-  latency_increase: 0.2
   tool_call_increase: 0.2
 output_dir: {output}
 random_seed: 42

@@ -9,13 +9,17 @@ Controlled AutoResearch-style red-teaming framework for LLM agent systems. This 
 | `mock` | Deterministic local simulation | `adapter_type: mock` | No |
 | `agentdojo` | Mock via `agentdojo_mock_mode: true` | `adapter_config.agentdojo_mock_mode` | No (mock); Yes (real) |
 | `langgraph_synthetic` | Deterministic graph fallback | `adapter_type: langgraph_synthetic` | No; uses LangGraph if installed |
-| `autogen_synthetic` | Deterministic conversation fallback | `adapter_type: autogen_synthetic` | No; uses AutoGen if installed |
-| `crewai_synthetic` | Deterministic crew fallback | `adapter_type: crewai_synthetic` | No; uses CrewAI if installed |
+| `autogen_synthetic` | Deterministic conversation fallback | `adapter_type: autogen_synthetic` | No; style-compatible LLM path only |
+| `crewai_synthetic` | Deterministic crew fallback | `adapter_type: crewai_synthetic` | No; style-compatible LLM path only |
+| `autogen_official` | Official AutoGen agent-chat runtime | `adapter_type: autogen_official` | Yes — `pip install -e ".[autogen]"` |
+| `crewai_official` | Official CrewAI Agent/Task/Crew runtime | `adapter_type: crewai_official` | Yes — `pip install -e ".[crewai]"` |
 
 All YAML configs in `configs/` default to **synthetic/fallback** modes so experiments run without external frameworks. To use real integrations:
 
 - **AgentDojo**: install AgentDojo per official docs, set `agentdojo_mock_mode: false` in `adapter_config`.
-- **LangGraph / AutoGen / CrewAI**: install the framework; the adapter will attempt to use it but always retains a local fallback.
+- **LangGraph real**: install LangGraph; `langgraph_real` uses a real LangGraph graph when `integration_mode: controlled` or `llm`.
+- **AutoGen / CrewAI official**: install optional extras and use `autogen_official` / `crewai_official` (aliases `autogen_real`, `crewai_real`). These **require** the official packages and **never** fall back to style-compatible pipelines.
+- **AutoGen / CrewAI style-compatible**: `autogen_synthetic` / `crewai_synthetic` with `integration_mode: llm` run local style-compatible LLM pipelines (`autogen_llm_workflow.py`, `crewai_llm_workflow.py`). These are **not** official-framework experiments.
 
 Transfer experiments load **best variants** from source `best_variants.jsonl` and re-run those exact attack definitions on target adapters.
 
@@ -31,6 +35,8 @@ Transfer experiments load **best variants** from source `best_variants.jsonl` an
 ```bash
 cd code
 pip install -e ".[dev]"
+# Optional official framework integrations:
+pip install -e ".[dev,autogen,crewai]"
 ```
 
 ## Run tests
@@ -47,6 +53,79 @@ python -m agent_redteam.run_experiment --config configs/mock_degradation.yaml
 python -m agent_redteam.run_transfer --config configs/transfer_mock_to_mock.yaml
 python -m agent_redteam.summarize_results --results-dir results/
 ```
+
+### Local live LLM experiments with Ollama
+
+Real-system adapters support **`integration_mode: llm`** with either deterministic mock agents (`llm_mode: mock`) or a **free local Ollama backend** (`llm_mode: live`, `llm_provider: ollama`).
+
+Install and start [Ollama](https://ollama.com/), then pull the default small model:
+
+```bash
+ollama pull llama3.2:3b
+```
+
+Verify it responds:
+
+```bash
+ollama run llama3.2:3b
+```
+
+Optional lighter fallback if `llama3.2:3b` is too slow:
+
+```bash
+ollama pull llama3.2:1b
+```
+
+Set `llm_model: llama3.2:1b` in the YAML `adapter_config` section.
+
+Run smoke experiments (2 tasks × 2 iterations):
+
+```bash
+cd code
+python -m agent_redteam.llm.ollama_preflight
+python -m agent_redteam.run_experiment --config configs/langgraph_real_llm_ollama_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/langgraph_real_llm_ollama_external_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/langgraph_real_llm_ollama_degradation_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/agentdojo_real_llm_ollama_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/agentdojo_real_llm_ollama_external_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/agentdojo_real_llm_ollama_degradation_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/autogen_official_llm_ollama_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/autogen_official_llm_ollama_external_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/autogen_official_llm_ollama_degradation_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/crewai_official_llm_ollama_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/crewai_official_llm_ollama_external_leakage_smoke.yaml
+python -m agent_redteam.run_experiment --config configs/crewai_official_llm_ollama_degradation_smoke.yaml
+python -m agent_redteam.summarize_results --results-dir results/
+```
+
+Canonical medium Ollama configs (`*_ollama_*_medium.yaml`) use `num_tasks: 8` and `num_iterations: 12` — run only after smoke succeeds and runtime is acceptable.
+
+Example `adapter_config` for Ollama live mode:
+
+```yaml
+adapter_config:
+  integration_mode: llm
+  llm_mode: live
+  llm_provider: ollama
+  llm_model: llama3.2:3b
+  ollama_base_url: http://localhost:11434
+  temperature: 0.0
+```
+
+**LLM-backed systems** (shared `agent_runner` + mock or Ollama):
+
+| System | Adapter | Mock configs | Ollama smoke configs |
+|--------|---------|--------------|----------------------|
+| LangGraph real | `langgraph_real` | `langgraph_real_llm_*_medium.yaml` | `langgraph_real_llm_ollama_*_smoke.yaml` |
+| AgentDojo real | `agentdojo_real` | `agentdojo_real_llm_*_medium.yaml` | `agentdojo_real_llm_ollama_*_smoke.yaml` |
+| AutoGen-style (local) | `autogen_synthetic` | `autogen_llm_*_medium.yaml` | `autogen_llm_ollama_*_smoke.yaml` |
+| CrewAI-style (local) | `crewai_synthetic` | `crewai_llm_*_medium.yaml` | `crewai_llm_ollama_*_smoke.yaml` |
+| AutoGen official | `autogen_official` | `autogen_official_llm_*_medium.yaml` | `autogen_official_llm_ollama_*_smoke.yaml` |
+| CrewAI official | `crewai_official` | `crewai_official_llm_*_medium.yaml` | `crewai_official_llm_ollama_*_smoke.yaml` |
+
+Set `integration_mode: llm` and `llm_mode: mock` for deterministic offline runs, or `llm_mode: live` with `llm_provider: ollama` for local Llama inference.
+
+**Important:** Style-compatible AutoGen/CrewAI configs (`autogen_llm_*`, `crewai_llm_*`) mimic framework architecture locally. Only `autogen_official` and `crewai_official` use official framework runtimes (`RoundRobinGroupChat`, `crew.kickoff()`).
 
 ## Project structure
 

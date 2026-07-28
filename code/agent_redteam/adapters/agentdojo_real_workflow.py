@@ -6,8 +6,14 @@ import random
 import time
 from typing import Any, Dict, List, Optional, TypedDict
 
+from agent_redteam.adapters.calibration import LeakageCalibrator
+from agent_redteam.adapters.workflow_degradation import (
+    attack_from_state,
+    maybe_apply_degradation,
+)
 from agent_redteam.data.canaries import contains_exact_canary
 from agent_redteam.evaluation.injection_source import INJECTION_LOCATION_TO_CHANNEL
+from agent_redteam.goals import is_leakage_goal
 from agent_redteam.schemas import AttackVariant, Task
 
 _AGENTDOJO_REAL_IMPORT_ERROR = (
@@ -46,6 +52,9 @@ class AgentDojoWorkflowState(TypedDict, total=False):
     final_answer: str
     rng_seed: int
     calibration_profile: str
+    domain: str
+    attack_goal: str
+    attack_target_agent: str
     attack_injection_location: str
     attack_target_channel: str
     attack_prompt_template: str
@@ -56,6 +65,9 @@ class AgentDojoWorkflowState(TypedDict, total=False):
     token_count: int
     estimated_cost: float
     latency_seconds: float
+    task_success: bool
+    retries: int
+    errors: List[str]
 
 
 _PROPAGATION_BASE: Dict[str, float] = {
@@ -110,14 +122,34 @@ def _merge_state(state: AgentDojoWorkflowState, update: Dict[str, Any]) -> Agent
     return merged
 
 
-def run_agentdojo_real_workflow(state: AgentDojoWorkflowState) -> AgentDojoWorkflowState:
+def _apply_stage_degradation(
+    state: AgentDojoWorkflowState,
+    calibrator: LeakageCalibrator,
+    node_agent: str,
+    seed_offset: int,
+) -> AgentDojoWorkflowState:
+    merged: Dict[str, Any] = dict(state)
+    attack = attack_from_state(merged)
+    rng = random.Random(int(merged.get("rng_seed", 0)) + seed_offset)
+    return maybe_apply_degradation(merged, attack, rng, node_agent, calibrator)  # type: ignore[return-value]
+
+
+def run_agentdojo_real_workflow(
+    state: AgentDojoWorkflowState,
+    calibrator: LeakageCalibrator,
+) -> AgentDojoWorkflowState:
     """Execute a minimal controlled AgentDojo-style agent pipeline locally."""
     start_total = time.perf_counter()
     injected = dict(state.get("injected_texts_by_channel") or {})
+    attack_goal = state.get("attack_goal", "")
 
     # user_input
     user_input = state.get("instruction", "")
-    if state.get("attack_injection_location") == "user_input" and state.get("attack_prompt_template"):
+    if (
+        is_leakage_goal(attack_goal)
+        and state.get("attack_injection_location") == "user_input"
+        and state.get("attack_prompt_template")
+    ):
         canary = (state.get("canaries") or ["SYN_CANARY"])[0]
         user_input = f"{user_input} {_format_injection(canary, state['attack_prompt_template'])}"
     state = _merge_state(
@@ -133,15 +165,19 @@ def run_agentdojo_real_workflow(state: AgentDojoWorkflowState) -> AgentDojoWorkf
     messages = list(state.get("inter_agent_messages") or [])
     logs = list(state.get("logs") or [])
     messages.append(f"[agentdojo-agent] Task {state.get('task_id')}: {user_input[:80]}")
-    if state.get("attack_injection_location") == "inter_agent_message" and state.get(
-        "attack_prompt_template"
+    if (
+        is_leakage_goal(attack_goal)
+        and state.get("attack_injection_location") == "inter_agent_message"
+        and state.get("attack_prompt_template")
     ):
         canary = (state.get("canaries") or ["SYN_CANARY"])[0]
         text = _format_injection(canary, state["attack_prompt_template"])
         messages.append(f"[agentdojo-agent] {text}")
         injected = _record_injection(injected, "inter_agent_messages", text)
-    if state.get("attack_injection_location") == "system_prompt" and state.get(
-        "attack_prompt_template"
+    if (
+        is_leakage_goal(attack_goal)
+        and state.get("attack_injection_location") == "system_prompt"
+        and state.get("attack_prompt_template")
     ):
         canary = (state.get("canaries") or ["SYN_CANARY"])[0]
         text = f"SYSTEM: {_format_injection(canary, state['attack_prompt_template'])}"
@@ -156,12 +192,15 @@ def run_agentdojo_real_workflow(state: AgentDojoWorkflowState) -> AgentDojoWorkf
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.00055,
         },
     )
+    state = _apply_stage_degradation(state, calibrator, "coordinator", 1)
 
     # retrieved context
     retrieved = list(state.get("retrieved_context") or [])
     retrieved.append(f"[agentdojo-env] Benchmark context for {state.get('task_id')}")
-    if state.get("attack_injection_location") == "retrieved_context" and state.get(
-        "attack_prompt_template"
+    if (
+        is_leakage_goal(attack_goal)
+        and state.get("attack_injection_location") == "retrieved_context"
+        and state.get("attack_prompt_template")
     ):
         canary = (state.get("canaries") or ["SYN_CANARY"])[0]
         text = _format_injection(canary, state["attack_prompt_template"])
@@ -175,14 +214,17 @@ def run_agentdojo_real_workflow(state: AgentDojoWorkflowState) -> AgentDojoWorkf
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.00045,
         },
     )
+    state = _apply_stage_degradation(state, calibrator, "retriever", 2)
 
     # tool observation
     tool_args = list(state.get("tool_call_arguments") or [])
     tool_outputs = list(state.get("tool_outputs") or [])
     tool_args.append(f"agentdojo_tool=run, task={state.get('task_id')}")
     tool_outputs.append(f"[agentdojo-tool] Observation for {state.get('task_id')}")
-    if state.get("attack_injection_location") == "tool_output" and state.get(
-        "attack_prompt_template"
+    if (
+        is_leakage_goal(attack_goal)
+        and state.get("attack_injection_location") == "tool_output"
+        and state.get("attack_prompt_template")
     ):
         canary = (state.get("canaries") or ["SYN_CANARY"])[0]
         text = _format_injection(canary, state["attack_prompt_template"])
@@ -198,6 +240,7 @@ def run_agentdojo_real_workflow(state: AgentDojoWorkflowState) -> AgentDojoWorkf
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.00065,
         },
     )
+    state = _apply_stage_degradation(state, calibrator, "worker", 3)
 
     # environment / memory state
     memory_writes = list(state.get("memory_writes") or [])
@@ -205,9 +248,17 @@ def run_agentdojo_real_workflow(state: AgentDojoWorkflowState) -> AgentDojoWorkf
     rng = random.Random(state.get("rng_seed", 0) + 11)
     tool_outputs_list = state.get("tool_outputs") or []
     stealth = float(state.get("attack_stealth_level", 0.0))
-    if tool_outputs_list and rng.random() < 0.35 + stealth * 0.25:
+    if (
+        is_leakage_goal(attack_goal)
+        and tool_outputs_list
+        and rng.random() < 0.35 + stealth * 0.25
+    ):
         mem = f"{mem} | tool_obs={tool_outputs_list[-1][:120]}"
-    if state.get("attack_injection_location") == "memory" and state.get("attack_prompt_template"):
+    if (
+        is_leakage_goal(attack_goal)
+        and state.get("attack_injection_location") == "memory"
+        and state.get("attack_prompt_template")
+    ):
         canary = (state.get("canaries") or ["SYN_CANARY"])[0]
         text = _format_injection(canary, state["attack_prompt_template"])
         mem = f"{mem} | {text}"
@@ -224,11 +275,19 @@ def run_agentdojo_real_workflow(state: AgentDojoWorkflowState) -> AgentDojoWorkf
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.0005,
         },
     )
+    state = _apply_stage_degradation(state, calibrator, "worker", 4)
 
     # final answer (user-visible only)
     answer = state.get("expected_answer", "")
-    final_answer = f"Answer: {answer}"
-    if state.get("attack_target_channel") == "final_output" and state.get("attack_variant_id"):
+    if state.get("task_success", True):
+        final_answer = f"Answer: {answer}"
+    else:
+        final_answer = "Task failed or incomplete."
+    if (
+        is_leakage_goal(attack_goal)
+        and state.get("attack_target_channel") == "final_output"
+        and state.get("attack_variant_id")
+    ):
         rng_final = random.Random(state.get("rng_seed", 0) + 99)
         if rng_final.random() < _propagation_probability(state):
             snippet = _find_canary_snippet(state)
@@ -270,15 +329,21 @@ def initial_state(
         "final_answer": "",
         "rng_seed": rng_seed,
         "calibration_profile": calibration_profile,
+        "domain": task.domain,
         "injected_texts_by_channel": {},
         "tool_calls": 0,
         "token_count": 0,
         "estimated_cost": 0.0,
         "latency_seconds": 0.0,
+        "task_success": True,
+        "retries": 0,
+        "errors": [],
     }
     if attack:
         state.update(
             {
+                "attack_goal": attack.goal,
+                "attack_target_agent": attack.target_agent,
                 "attack_injection_location": attack.injection_location,
                 "attack_target_channel": attack.target_channel,
                 "attack_prompt_template": attack.prompt_template,

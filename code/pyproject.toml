@@ -22,6 +22,13 @@ langgraph = [
 agentdojo = [
     "agentdojo>=0.1.0",
 ]
+autogen = [
+    "autogen-agentchat>=0.7.0",
+    "autogen-ext[openai]>=0.7.0",
+]
+crewai = [
+    "crewai>=0.80.0",
+]
 
 [project.scripts]
 

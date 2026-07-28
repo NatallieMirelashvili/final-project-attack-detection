@@ -235,7 +235,6 @@ class ExperimentRunner:
                     "attacked_task_success_rate",
                     "utility_drop",
                     "cost_amplification",
-                    "latency_increase",
                     "tool_call_increase",
                     "retry_rate",
                     "loop_or_failure_rate",

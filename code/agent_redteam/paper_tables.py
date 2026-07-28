@@ -230,9 +230,9 @@ def generate_paper_tables(results_path: Path, summary_path: Path) -> None:
                             "attacked_task_success_rate": perf.get("attacked_task_success_rate", 0.0),
                             "utility_drop": perf.get("utility_drop", 0.0),
                             "cost_amplification": perf.get("cost_amplification", 0.0),
-                            "latency_increase": perf.get("latency_increase", 0.0),
                             "tool_call_increase": perf.get("tool_call_increase", 0.0),
                             "retry_rate": perf.get("retry_rate", 0.0),
+                            "loop_or_failure_rate": perf.get("loop_or_failure_rate", 0.0),
                         },
                         meta,
                     )

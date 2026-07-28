@@ -14,7 +14,9 @@ SYSTEM_ARCHITECTURE: Dict[str, str] = {
     "langgraph_synthetic": "graph_workflow",
     "langgraph_real": "graph_workflow",
     "autogen_synthetic": "conversation",
+    "autogen_official": "conversation_official",
     "crewai_synthetic": "role_based",
+    "crewai_official": "role_based_official",
 }
 
 ADAPTER_CLASS_NAMES: Dict[str, str] = {
@@ -25,7 +27,11 @@ ADAPTER_CLASS_NAMES: Dict[str, str] = {
     "langgraph_real": "LangGraphRealAdapter",
     "langgraph": "LangGraphSyntheticAdapter",
     "autogen_synthetic": "AutoGenSyntheticAdapter",
+    "autogen_official": "AutoGenOfficialAdapter",
+    "autogen_real": "AutoGenOfficialAdapter",
     "crewai_synthetic": "CrewAISyntheticAdapter",
+    "crewai_official": "CrewAIOfficialAdapter",
+    "crewai_real": "CrewAIOfficialAdapter",
 }
 
 
@@ -41,12 +47,20 @@ def resolve_integration_mode(
     adapter_type: str,
     adapter_config: Dict[str, Any],
 ) -> str:
-    """Resolve integration mode: mock, synthetic_fallback, or real."""
+    """Resolve integration mode: mock, synthetic_fallback, controlled, llm, or real (legacy)."""
     adapter_type = (adapter_type or system_name or "mock").lower()
     system_name = system_name or adapter_type
 
-    if adapter_config.get("integration_mode") in ("mock", "synthetic_fallback", "real"):
-        return str(adapter_config["integration_mode"])
+    explicit = adapter_config.get("integration_mode")
+    if explicit in ("mock", "synthetic_fallback", "controlled", "llm"):
+        return str(explicit)
+    if explicit == "real":
+        if adapter_type in ("langgraph_real", "agentdojo_real") or system_name in (
+            "langgraph_real",
+            "agentdojo_real",
+        ):
+            return "controlled"
+        return "real"
 
     if adapter_type == "mock" or system_name == "mock":
         return "mock"
@@ -68,7 +82,7 @@ def resolve_integration_mode(
         "langgraph_real",
         "agentdojo_real",
     ):
-        return "real"
+        return "controlled"
 
     if adapter_type in synthetic_types or any(
         system_name.startswith(s) for s in ("langgraph_synthetic", "autogen_synthetic", "crewai_synthetic")
@@ -81,7 +95,11 @@ def resolve_integration_mode(
 
 
 def resolve_final_output_source(integration_mode: str) -> str:
+    if integration_mode == "llm":
+        return "llm_agent_response"
     if integration_mode == "real":
+        return "real_framework_response"
+    if integration_mode == "controlled":
         return "real_framework_response"
     return "synthetic_finalizer"
 
@@ -100,7 +118,7 @@ def resolve_finalizer_exposure_for_metrics(
     integration_mode: str,
     adapter_config: Dict[str, Any],
 ) -> str:
-    if integration_mode == "real":
+    if integration_mode in ("real", "controlled", "llm"):
         return "none"
     return resolve_finalizer_mode(adapter_config)
 
@@ -167,5 +185,8 @@ def build_experiment_metadata(config: ExperimentConfig) -> Dict[str, Any]:
         "final_output_source": resolve_final_output_source(integration_mode),
         "adapter_name": resolve_adapter_name(config.adapter_type, config.system_name),
         "reward_profile": config.reward_profile or "",
+        "llm_mode": adapter_config.get("llm_mode", ""),
+        "llm_provider": adapter_config.get("llm_provider", ""),
+        "llm_model": adapter_config.get("llm_model", ""),
         "adapter_config": adapter_config,
     }

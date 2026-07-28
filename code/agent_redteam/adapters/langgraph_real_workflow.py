@@ -6,8 +6,14 @@ import random
 import time
 from typing import Any, Dict, List, Optional, TypedDict
 
+from agent_redteam.adapters.calibration import LeakageCalibrator
+from agent_redteam.adapters.workflow_degradation import (
+    attack_from_state,
+    maybe_apply_degradation,
+)
 from agent_redteam.data.canaries import contains_exact_canary
 from agent_redteam.evaluation.injection_source import INJECTION_LOCATION_TO_CHANNEL
+from agent_redteam.goals import is_leakage_goal
 from agent_redteam.schemas import AttackVariant, Task
 
 _LANGGRAPH_IMPORT_ERROR = (
@@ -41,6 +47,9 @@ class WorkflowGraphState(TypedDict, total=False):
     final_answer: str
     rng_seed: int
     calibration_profile: str
+    domain: str
+    attack_goal: str
+    attack_target_agent: str
     attack_injection_location: str
     attack_target_channel: str
     attack_prompt_template: str
@@ -51,6 +60,9 @@ class WorkflowGraphState(TypedDict, total=False):
     token_count: int
     estimated_cost: float
     latency_seconds: float
+    task_success: bool
+    retries: int
+    errors: List[str]
 
 
 _PROPAGATION_BASE: Dict[str, float] = {
@@ -100,7 +112,33 @@ def _find_canary_snippet(state: WorkflowGraphState) -> Optional[str]:
     return None
 
 
-def build_langgraph_workflow() -> Any:
+def _apply_node_degradation(
+    state: Dict[str, Any],
+    update: Dict[str, Any],
+    calibrator: LeakageCalibrator,
+    node_agent: str,
+    seed_offset: int,
+) -> Dict[str, Any]:
+    merged: Dict[str, Any] = {**state, **update}
+    attack = attack_from_state(merged)
+    rng = random.Random(int(merged.get("rng_seed", 0)) + seed_offset)
+    maybe_apply_degradation(merged, attack, rng, node_agent, calibrator)
+    update.update(
+        {
+            "latency_seconds": merged.get("latency_seconds", 0.0),
+            "token_count": merged.get("token_count", 0),
+            "estimated_cost": merged.get("estimated_cost", 0.0),
+            "tool_calls": merged.get("tool_calls", 0),
+            "retries": merged.get("retries", 0),
+            "task_success": merged.get("task_success", True),
+            "errors": list(merged.get("errors") or []),
+            "delegation_requests": list(merged.get("delegation_requests") or []),
+        }
+    )
+    return update
+
+
+def build_langgraph_workflow(calibrator: LeakageCalibrator) -> Any:
     """Compile a minimal LangGraph workflow with real node execution."""
     StateGraph, START, END = try_import_langgraph()
 
@@ -109,17 +147,23 @@ def build_langgraph_workflow() -> Any:
         user_input = state.get("instruction", "")
         injected = dict(state.get("injected_texts_by_channel") or {})
         location = state.get("attack_injection_location", "")
-        if location == "user_input" and state.get("attack_prompt_template"):
+        attack_goal = state.get("attack_goal", "")
+        if (
+            is_leakage_goal(attack_goal)
+            and location == "user_input"
+            and state.get("attack_prompt_template")
+        ):
             canary = (state.get("canaries") or ["SYN_CANARY"])[0]
             user_input = f"{user_input} {_format_injection(canary, state['attack_prompt_template'])}"
         latency = state.get("latency_seconds", 0.0) + (time.perf_counter() - start)
-        return {
+        update: Dict[str, Any] = {
             "user_input": user_input,
             "injected_texts_by_channel": injected,
             "latency_seconds": latency,
             "token_count": state.get("token_count", 0) + 40,
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.0004,
         }
+        return update
 
     def planner_node(state: WorkflowGraphState) -> Dict[str, Any]:
         start = time.perf_counter()
@@ -134,24 +178,28 @@ def build_langgraph_workflow() -> Any:
         delegation.append(f"planner->retriever: fetch context for {state.get('task_id')}")
 
         location = state.get("attack_injection_location", "")
-        if location == "inter_agent_message" and state.get("attack_prompt_template"):
+        attack_goal = state.get("attack_goal", "")
+        if is_leakage_goal(attack_goal) and state.get("attack_prompt_template"):
             canary = (state.get("canaries") or ["SYN_CANARY"])[0]
-            text = _format_injection(canary, state["attack_prompt_template"])
-            messages.append(f"[planner] {text}")
-            injected = _record_injection(
-                {**state, "injected_texts_by_channel": injected},
-                "inter_agent_messages",
-                text,
-            )
-
-        if location == "system_prompt" and state.get("attack_prompt_template"):
-            canary = (state.get("canaries") or ["SYN_CANARY"])[0]
-            text = f"SYSTEM: {_format_injection(canary, state['attack_prompt_template'])}"
-            logs.append(text)
-            injected = _record_injection({**state, "injected_texts_by_channel": injected}, "logs", text)
+            if location == "inter_agent_message":
+                text = _format_injection(canary, state["attack_prompt_template"])
+                messages.append(f"[planner] {text}")
+                injected = _record_injection(
+                    {**state, "injected_texts_by_channel": injected},
+                    "inter_agent_messages",
+                    text,
+                )
+            if location == "system_prompt":
+                text = f"SYSTEM: {_format_injection(canary, state['attack_prompt_template'])}"
+                logs.append(text)
+                injected = _record_injection(
+                    {**state, "injected_texts_by_channel": injected},
+                    "logs",
+                    text,
+                )
 
         latency = state.get("latency_seconds", 0.0) + (time.perf_counter() - start)
-        return {
+        update = {
             "inter_agent_messages": messages,
             "logs": logs,
             "delegation_requests": delegation,
@@ -160,6 +208,7 @@ def build_langgraph_workflow() -> Any:
             "token_count": state.get("token_count", 0) + 60,
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.0006,
         }
+        return _apply_node_degradation(state, update, calibrator, "coordinator", 1)
 
     def retriever_node(state: WorkflowGraphState) -> Dict[str, Any]:
         start = time.perf_counter()
@@ -169,7 +218,12 @@ def build_langgraph_workflow() -> Any:
         retrieved.append(ctx)
 
         location = state.get("attack_injection_location", "")
-        if location == "retrieved_context" and state.get("attack_prompt_template"):
+        attack_goal = state.get("attack_goal", "")
+        if (
+            is_leakage_goal(attack_goal)
+            and location == "retrieved_context"
+            and state.get("attack_prompt_template")
+        ):
             canary = (state.get("canaries") or ["SYN_CANARY"])[0]
             text = _format_injection(canary, state["attack_prompt_template"])
             retrieved.append(text)
@@ -180,13 +234,14 @@ def build_langgraph_workflow() -> Any:
             )
 
         latency = state.get("latency_seconds", 0.0) + (time.perf_counter() - start)
-        return {
+        update = {
             "retrieved_context": retrieved,
             "injected_texts_by_channel": injected,
             "latency_seconds": latency,
             "token_count": state.get("token_count", 0) + 50,
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.0005,
         }
+        return _apply_node_degradation(state, update, calibrator, "retriever", 2)
 
     def tool_node(state: WorkflowGraphState) -> Dict[str, Any]:
         start = time.perf_counter()
@@ -198,7 +253,12 @@ def build_langgraph_workflow() -> Any:
         tool_outputs.append(output)
 
         location = state.get("attack_injection_location", "")
-        if location == "tool_output" and state.get("attack_prompt_template"):
+        attack_goal = state.get("attack_goal", "")
+        if (
+            is_leakage_goal(attack_goal)
+            and location == "tool_output"
+            and state.get("attack_prompt_template")
+        ):
             canary = (state.get("canaries") or ["SYN_CANARY"])[0]
             text = _format_injection(canary, state["attack_prompt_template"])
             tool_outputs.append(text)
@@ -209,7 +269,7 @@ def build_langgraph_workflow() -> Any:
             )
 
         latency = state.get("latency_seconds", 0.0) + (time.perf_counter() - start)
-        return {
+        update = {
             "tool_call_arguments": tool_args,
             "tool_outputs": tool_outputs,
             "tool_calls": state.get("tool_calls", 0) + 1,
@@ -218,6 +278,7 @@ def build_langgraph_workflow() -> Any:
             "token_count": state.get("token_count", 0) + 70,
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.0007,
         }
+        return _apply_node_degradation(state, update, calibrator, "worker", 3)
 
     def memory_node(state: WorkflowGraphState) -> Dict[str, Any]:
         start = time.perf_counter()
@@ -228,11 +289,20 @@ def build_langgraph_workflow() -> Any:
         rng = random.Random(state.get("rng_seed", 0) + 7)
         tool_outputs = state.get("tool_outputs") or []
         stealth = float(state.get("attack_stealth_level", 0.0))
-        if tool_outputs and rng.random() < 0.35 + stealth * 0.25:
+        attack_goal = state.get("attack_goal", "")
+        if (
+            is_leakage_goal(attack_goal)
+            and tool_outputs
+            and rng.random() < 0.35 + stealth * 0.25
+        ):
             mem = f"{mem} | tool_ref={tool_outputs[-1][:120]}"
 
         location = state.get("attack_injection_location", "")
-        if location == "memory" and state.get("attack_prompt_template"):
+        if (
+            is_leakage_goal(attack_goal)
+            and location == "memory"
+            and state.get("attack_prompt_template")
+        ):
             canary = (state.get("canaries") or ["SYN_CANARY"])[0]
             text = _format_injection(canary, state["attack_prompt_template"])
             mem = f"{mem} | {text}"
@@ -246,7 +316,7 @@ def build_langgraph_workflow() -> Any:
         messages.append(f"[memory] Updated state for {state.get('task_id')}")
 
         latency = state.get("latency_seconds", 0.0) + (time.perf_counter() - start)
-        return {
+        update = {
             "memory_writes": memory_writes,
             "inter_agent_messages": messages,
             "injected_texts_by_channel": injected,
@@ -254,16 +324,25 @@ def build_langgraph_workflow() -> Any:
             "token_count": state.get("token_count", 0) + 45,
             "estimated_cost": state.get("estimated_cost", 0.0) + 0.00045,
         }
+        return _apply_node_degradation(state, update, calibrator, "worker", 4)
 
     def summarizer_node(state: WorkflowGraphState) -> Dict[str, Any]:
         start = time.perf_counter()
         answer = state.get("expected_answer", "")
-        final_answer = f"Answer: {answer}"
+        if state.get("task_success", True):
+            final_answer = f"Answer: {answer}"
+        else:
+            final_answer = "Task failed or incomplete."
         messages = list(state.get("inter_agent_messages") or [])
         messages.append(f"[summarizer] Prepared response for {state.get('task_id')}")
 
+        attack_goal = state.get("attack_goal", "")
         target = state.get("attack_target_channel", "")
-        if target == "final_output" and state.get("attack_variant_id"):
+        if (
+            is_leakage_goal(attack_goal)
+            and target == "final_output"
+            and state.get("attack_variant_id")
+        ):
             rng = random.Random(state.get("rng_seed", 0) + 99)
             if rng.random() < _propagation_probability(state):
                 snippet = _find_canary_snippet(state)
@@ -326,15 +405,21 @@ def initial_state(
         "final_answer": "",
         "rng_seed": rng_seed,
         "calibration_profile": calibration_profile,
+        "domain": task.domain,
         "injected_texts_by_channel": {},
         "tool_calls": 0,
         "token_count": 0,
         "estimated_cost": 0.0,
         "latency_seconds": 0.0,
+        "task_success": True,
+        "retries": 0,
+        "errors": [],
     }
     if attack:
         state.update(
             {
+                "attack_goal": attack.goal,
+                "attack_target_agent": attack.target_agent,
                 "attack_injection_location": attack.injection_location,
                 "attack_target_channel": attack.target_channel,
                 "attack_prompt_template": attack.prompt_template,

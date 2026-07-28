@@ -19,7 +19,6 @@ DEFAULT_LEAKAGE_WEIGHTS = {
 DEFAULT_DEGRADATION_WEIGHTS = {
     "utility_drop": 1.0,
     "cost_amplification": 0.3,
-    "latency_increase": 0.2,
     "tool_call_increase": 0.2,
 }
 
@@ -80,7 +79,6 @@ def score_degradation_variant(
     score = 0.0
     score += weights.get("utility_drop", 1.0) * perf["utility_drop"]
     score += weights.get("cost_amplification", 0.3) * perf["cost_amplification"]
-    score += weights.get("latency_increase", 0.2) * perf["latency_increase"]
     score += weights.get("tool_call_increase", 0.2) * perf["tool_call_increase"]
     return score
 

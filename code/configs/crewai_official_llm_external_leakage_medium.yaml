@@ -1,0 +1,17 @@
+experiment_name: crewai_official_llm_external_leakage_medium
+system_name: crewai_official
+goal: external_leakage
+num_iterations: 12
+num_tasks: 8
+attack_generator: auto_research
+attack_generator_version: v2
+defense: no_defense
+calibration_profile: medium
+output_dir: results
+random_seed: 42
+adapter_type: crewai_official
+adapter_config:
+  integration_mode: llm
+  official_runtime: true
+  llm_mode: mock
+  calibration_profile: medium

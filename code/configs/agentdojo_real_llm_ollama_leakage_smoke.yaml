@@ -1,0 +1,20 @@
+experiment_name: agentdojo_real_llm_ollama_leakage_smoke
+system_name: agentdojo_real
+goal: leakage
+num_iterations: 2
+num_tasks: 2
+attack_generator: auto_research
+attack_generator_version: v2
+defense: no_defense
+calibration_profile: medium
+output_dir: results
+random_seed: 42
+adapter_type: agentdojo_real
+adapter_config:
+  integration_mode: llm
+  llm_mode: live
+  llm_provider: ollama
+  llm_model: llama3.2:3b
+  ollama_base_url: http://localhost:11434
+  temperature: 0.0
+  calibration_profile: medium

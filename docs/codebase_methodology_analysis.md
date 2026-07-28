@@ -83,7 +83,7 @@ The system evaluates **adversarial input manipulation** against **synthetic agen
 | **Inputs** | YAML `ExperimentConfig`; synthetic `Task` objects (`generate_synthetic_tasks`); `AttackVariant` from generators; optional `DefenseConfig`. |
 | **Outputs** | Per-experiment directory under `results/<experiment_name>/` (JSONL, JSON, CSV); aggregated `results/summary/` (CSVs, `paper_tables.md`). |
 | **Main process** | Clean runs → iterative attack generation → attacked runs per task → score variant → aggregate metrics → write artifacts. |
-| **Relation to LLM threat modeling** | The codebase models **multi-channel agent traces** (messages, tools, memory, final output) and **injection/propagation** patterns relevant to LLM agent threats, but **does not call external LLM APIs** for attack generation or execution (verified: no `openai`, `anthropic`, or similar imports under `code/`). Execution is **deterministic simulation** or **local framework graphs** with Python node functions. |
+| **Relation to LLM threat modeling** | The codebase models **multi-channel agent traces** (messages, tools, memory, final output) and **injection/propagation** patterns relevant to LLM agent threats. **Attack generation** does not call external LLM APIs. **Execution** supports two real-system tracks: **`integration_mode: controlled`** (deterministic Python nodes) and **`integration_mode: llm`** (autonomous agents via `agent_redteam/llm/` with deterministic `MockLLMClient` by default; optional live mode is environment-gated). |
 
 ---
 
@@ -105,7 +105,15 @@ The system evaluates **adversarial input manipulation** against **synthetic agen
 7. **Metadata** — `build_experiment_metadata(config)` → `metrics_summary.json`.
 8. **Summarize** (optional) — `summarize_results.summarize()` + `paper_tables.generate_paper_tables()` for cross-experiment tables.
 
-**Models / LLMs:** Not used in the implementation for generation or inference. Optional packages (`langgraph`, `agentdojo`) gate "real" adapters; workflow steps are still implemented as **Python functions** (see `langgraph_real_workflow.py`, `agentdojo_real_workflow.py`).
+**Models / LLMs:** Attack generators remain heuristic/non-LLM. Real adapters support three execution tracks:
+
+| Track | Config | Purpose |
+|-------|--------|---------|
+| **`controlled`** | `integration_mode: controlled` (legacy YAML: `real`) | Deterministic reproducible baseline (`*_real_workflow.py`) |
+| **`llm + mock`** | `integration_mode: llm`, `llm_mode: mock` | Deterministic autonomous-agent test mode (`llm/mock_client.py`) |
+| **`llm + live/ollama`** | `integration_mode: llm`, `llm_mode: live`, `llm_provider: ollama` | Real local LLM agents via Ollama HTTP API (`llm/ollama_client.py`); default model **`llama3.2:3b`**, lighter fallback **`llama3.2:1b`** |
+
+Mock LLM results validate architecture but are **not** real LLM behavior. Ollama/Llama results are **local live LLM** runs (free, `estimated_cost=0`). Optional **`llm_provider: openai`** remains available with `OPENAI_API_KEY`. Latency is recorded per run but is **not** a primary research metric.
 
 ### B. Flow diagram
 
@@ -179,11 +187,20 @@ YAML Config (configs/*.yaml)
 | `adapters/mock_adapter.py` | `mock` | Single-agent deterministic simulation + calibrator |
 | `adapters/synthetic_workflow_base.py` | (base) | Multi-node workflow: coordinator→retriever→worker→reviewer |
 | `adapters/langgraph_adapter.py` | `langgraph_synthetic` | Uses `SyntheticWorkflowRunner` (LangGraph import optional, unused for execution path per adapter code) |
-| `adapters/langgraph_real_adapter.py` | `langgraph_real` | Real `StateGraph` (`langgraph_real_workflow.py`) |
+| `adapters/langgraph_real_adapter.py` | `langgraph_real` | **`controlled`** → `langgraph_real_workflow.py`; **`llm`** → `langgraph_llm_workflow.py` |
 | `adapters/agentdojo_adapter.py` | `agentdojo` | Mock via `MockAdapter` or placeholder real path |
-| `adapters/agentdojo_real_adapter.py` | `agentdojo_real` | Controlled local workflow when `agentdojo` import succeeds |
-| `adapters/autogen_adapter.py` | `autogen_synthetic` | Conversation-style synthetic workflow |
-| `adapters/crewai_adapter.py` | `crewai_synthetic` | Role-based synthetic workflow |
+| `adapters/agentdojo_real_adapter.py` | `agentdojo_real` | **`controlled`** → `agentdojo_real_workflow.py`; **`llm`** → `agentdojo_llm_workflow.py` |
+| `adapters/autogen_adapter.py` | `autogen_synthetic` | **`synthetic_fallback`** → `SyntheticWorkflowRunner`; **`llm`** → `autogen_llm_workflow.py` (style-compatible) |
+| `adapters/crewai_adapter.py` | `crewai_synthetic` | **`synthetic_fallback`** → `SyntheticWorkflowRunner`; **`llm`** → `crewai_llm_workflow.py` (style-compatible) |
+| `adapters/autogen_official_adapter.py` | `autogen_official` | **`llm`** → `autogen_official_workflow.py` (official `RoundRobinGroupChat`) |
+| `adapters/crewai_official_adapter.py` | `crewai_official` | **`llm`** → `crewai_official_workflow.py` (official `Crew.kickoff()`) |
+| `adapters/autogen_llm_workflow.py` | — | AutoGen-**style** LLM multi-agent conversation pipeline (not official runtime) |
+| `adapters/crewai_llm_workflow.py` | — | CrewAI-**style** LLM role/task pipeline (not official runtime) |
+| `adapters/autogen_official_workflow.py` | — | Official AutoGen `AssistantAgent` + `RoundRobinGroupChat` |
+| `adapters/crewai_official_workflow.py` | — | Official CrewAI `Agent` + `Task` + `Crew` + `Process.sequential` |
+| `adapters/official_runtime.py` | — | Optional import helpers; clear errors when packages missing |
+| `llm/autogen_model_client.py` | — | Mock/Ollama bridge to AutoGen `ChatCompletionClient` |
+| `llm/crewai_model_client.py` | — | Mock/Ollama bridge to CrewAI `BaseLLM` |
 | `adapters/calibration.py` | — | `LeakageCalibrator`, profiles `easy/medium/hard/legacy` |
 | `adapters/finalizer_exposure.py` | — | Synthetic finalizer modes (mock/synthetic **only**; not used for `integration_mode: real`) |
 | `adapters/adapter_factory.py` | — | `create_adapter()`, `create_adapter_from_config()` |
@@ -223,7 +240,11 @@ YAML Config (configs/*.yaml)
 | Degradation | `mock_degradation_medium.yaml`, `langgraph_synthetic_degradation_hard.yaml` | `degradation` |
 | Attack comparison | `langgraph_attack_compare_random.yaml`, `*_auto_v2.yaml` | `leakage` or `external_leakage` |
 | Defense comparison | `langgraph_defense_prompt_defense.yaml`, `langgraph_external_defense_*.yaml` | leakage / external |
-| Real framework | `langgraph_real_*.yaml`, `agentdojo_real_*.yaml` | `leakage` / `external_leakage` |
+| Real framework (controlled) | `langgraph_real_*.yaml`, `agentdojo_real_*.yaml` | `integration_mode: real` or `controlled`; deterministic baseline |
+| Real framework (LLM mock) | `langgraph_real_llm_*.yaml`, `agentdojo_real_llm_*.yaml` | `integration_mode: llm`, `llm_mode: mock` |
+| Style-compatible LLM mock | `autogen_llm_*_medium.yaml`, `crewai_llm_*_medium.yaml` | AutoGen/CrewAI-**style** local LLM pipelines (not official runtimes) |
+| Official framework LLM mock | `autogen_official_llm_*_medium.yaml`, `crewai_official_llm_*_medium.yaml` | Official AutoGen/CrewAI runtimes with `llm_mode: mock` |
+| Real framework (LLM Ollama) | `*_llm_ollama_*_smoke.yaml`, `*_ollama_*_medium.yaml` | `integration_mode: llm`, `llm_mode: live`, `llm_provider: ollama` |
 | Transfer | `transfer_langgraph_to_agentdojo.yaml`, `cross_framework_medium_matrix.yaml` | `leakage` (transfer runner) |
 
 **~80 YAML files** in `configs/`.
@@ -268,7 +289,8 @@ Per experiment (`runner.py`):
 
 **Performance** (`compute_all_performance_metrics`):
 
-- `utility_drop`, `cost_amplification`, `latency_increase`, `tool_call_increase`, `retry_rate`, task success rates.
+- **Primary degradation metrics:** `utility_drop`, `clean_task_success_rate`, `attacked_task_success_rate`, `cost_amplification`, `tool_call_increase`, `retry_rate`, `loop_or_failure_rate`.
+- **Raw `latency_seconds`** remains on each `RunResult`; **`latency_increase`** is still computed in `performance_metrics.py` for debugging but is **excluded from degradation scoring, paper tables, and primary summaries**.
 
 **Attack success definition:** For leakage goals, a run "succeeds" as an attack if `contains_exact_canary()` finds a task canary in allowed channels (`leakage_metrics.py`). Injection at `tool_output` does not count as internal leakage if the canary appears only in that injected snippet (`injection_metadata.injected_texts_by_channel`).
 
@@ -315,7 +337,6 @@ Uses `reward_profiles.py` when `reward_profile: external_leakage`:
 |-----------|--------|
 | `utility_drop` | 1.0 |
 | `cost_amplification` | 0.3 |
-| `latency_increase` | 0.2 |
 | `tool_call_increase` | 0.2 |
 
 ### How score affects attack selection
@@ -335,7 +356,7 @@ Uses `reward_profiles.py` when `reward_profile: external_leakage`:
 
 ### What "agents" mean in this codebase
 
-Multi-step **workflow roles** simulated in adapters (e.g. planner, retriever, worker, reviewer in `synthetic_workflow_base.py`; analogous stages in real LangGraph/AgentDojo workflows). They are **not** autonomous LLM agents calling an API in the current implementation.
+Multi-step **workflow roles** (planner, retriever, worker, memory, finalizer). In **controlled** mode they are deterministic Python node functions. In **LLM** mode (`integration_mode: llm`) each role calls the shared `LLMClient` via `agent_runner.run_agent_step()`. **Leakage** in LLM mode emerges when mock/live LLM outputs copy injected canaries into downstream channels or final output; **degradation** emerges from LLM/tool behavior (incomplete answers, extra tool calls, retries)—not from `workflow_degradation.maybe_apply_degradation()`, which remains **controlled-mode only**.
 
 ### Attack generation approaches
 
@@ -414,7 +435,7 @@ Examples: `leakage_results.csv`, `paper_tables.md`, `internal_clean_leakage_resu
 
 #### 1. System Overview
 
-We implemented a reproducible red-teaming framework (`agent-redteam`, Python ≥3.11) that evaluates adversarial manipulations against synthetic multi-step agent workflows. The system does not invoke external large language model APIs; instead, it uses deterministic simulators and optional local framework graphs (LangGraph, AgentDojo) to produce traces and final responses. Sensitive content is represented exclusively by synthetic canary tokens (`data/canaries.py`), following the safety constraints stated in `README.md`.
+We implemented a reproducible red-teaming framework (`agent-redteam`, Python ≥3.11) that evaluates adversarial manipulations against synthetic and real multi-step agent workflows. Real systems support **controlled** (deterministic reproducible baseline) and **LLM** (autonomous mock/live agents) integration modes. Sensitive content is represented exclusively by synthetic canary tokens (`data/canaries.py`), following the safety constraints stated in `README.md`.
 
 #### 2. Threat Modeling Pipeline
 
@@ -434,7 +455,7 @@ Variant quality is computed by weighted linear combinations of leakage and perfo
 
 #### 6. Experimental Setup
 
-Experiments vary target system (`system_name` / `adapter_type`), goal (`leakage`, `external_leakage`, `degradation`), calibration profile (`medium`, `hard`, `legacy`), defense preset (D0–D4), and generator version. Integration mode is recorded as `mock`, `synthetic_fallback`, or `real` (`experiments/experiment_metadata.py`). Typical settings use `num_tasks=8`, `num_iterations=8–12`, and `random_seed=42`. Transfer experiments (`experiments/transfer_runner.py`) replay variants from source `best_variants.jsonl` on target adapters.
+Experiments vary target system (`system_name` / `adapter_type`), goal (`leakage`, `external_leakage`, `degradation`), calibration profile (`medium`, `hard`, `legacy`), defense preset (D0–D4), and generator version. Integration mode is recorded as `mock`, `synthetic_fallback`, **`controlled`** (legacy YAML `real`), or **`llm`** with optional `llm_mode` (`mock`, `live`) (`experiments/experiment_metadata.py`). Typical settings use `num_tasks=8`, `num_iterations=8–12`, and `random_seed=42`. Transfer experiments (`experiments/transfer_runner.py`) replay variants from source `best_variants.jsonl` on target adapters.
 
 #### 7. Evaluation Metrics
 
@@ -453,20 +474,26 @@ Per-experiment artifacts are written under `results/<experiment_name>/`. Cross-e
 | **What it does** | Controlled red-team benchmark for synthetic agent workflows: search adversarial variants, run them through multiple adapters, measure canary leakage and/or utility degradation. |
 | **Central pipeline** | Config → synthetic tasks → clean runs → iterative (generate variant → attack all tasks → score → log) → aggregate metrics → optional summary tables. |
 | **Methodology** | Empirical comparison of attack generators, defenses, calibration profiles, and frameworks under leakage/degradation objectives with reproducible seeds and structured trace channels. |
-| **Main implementation contribution** | End-to-end, test-covered framework separating **internal vs final-output leakage**, supporting **synthetic and real local workflows**, **heuristic AutoResearch v2** with family bandits, and **paper-ready aggregation**—without relying on external LLM APIs in the codebase. |
+| **Main implementation contribution** | End-to-end, test-covered framework separating **internal vs final-output leakage**, supporting **synthetic and real workflows in controlled and LLM modes**, **heuristic AutoResearch v2** with family bandits, and **paper-ready aggregation**. |
 
 ---
 
 ## Points Requiring Verification
 
-1. **"Real" LangGraph / AgentDojo vs production benchmarks** — Real adapters execute local Python workflow graphs and require package import; they do **not** appear to run full official AgentDojo benchmark suites with live LLM agents (`agentdojo_adapter.py` real path is largely placeholder; `agentdojo_real_workflow.py` is a controlled local pipeline).
+1. **"Real" LangGraph / AgentDojo vs production benchmarks** — Real adapters execute local Python workflow graphs and require package import. **`integration_mode: llm`** uses AgentDojo-style / LangGraph-style local pipelines with mock or live LLM agents; this is **not** the full official AgentDojo benchmark API with production tasks unless extended further. **`agentdojo_adapter.py`** mock path remains separate from **`agentdojo_real`**.
 
-2. **LangGraph synthetic adapter** — `langgraph_adapter.py` checks for LangGraph import but routes execution through `SyntheticWorkflowRunner`; whether installed LangGraph changes behavior should be verified if claimed in the paper.
+2. **AutoGen / CrewAI style-compatible vs official** — **`autogen_synthetic`** and **`crewai_synthetic`** with **`integration_mode: llm`** run **style-compatible local LLM pipelines** (`autogen_llm_workflow.py`, `crewai_llm_workflow.py`) via the shared `agent_runner`. These are **not** official-framework experiments. **`autogen_official`** and **`crewai_official`** require optional packages (`agent-redteam[autogen]`, `agent-redteam[crewai]`), use official APIs (`RoundRobinGroupChat`, `crew.kickoff()`), and **never** silently fall back to style-compatible workflows.
 
-3. **Threat-modeling scope** — The code evaluates **canary leakage and utility degradation** in synthetic tasks; it does **not** implement a separate semantic "threat model" artifact (e.g. STRIDE diagrams) unless that is defined outside `code/`.
+3. **Mock LLM vs live Ollama/Llama** — **`llm_mode: mock`** is role-scripted and deterministic; it is not equivalent to frontier or local Llama behavior. **`llm_mode: live`** with Ollama uses real local inference; results may vary by hardware, model size, and temperature even at `temperature: 0.0`.
 
-4. **LLM-based attacks** — Not present in repository; any paper claim about LLM-generated adversarial prompts would require extensions not in this codebase.
+4. **Ollama availability** — Live Ollama configs require the Ollama app or `ollama serve` and a pulled model (`ollama pull llama3.2:3b`). CI skips Ollama integration tests when the server is unreachable.
 
-5. **Figure generation** — Tables and CSVs only; plots for the paper must be produced externally from `results/summary/`.
+5. **LangGraph synthetic adapter** — `langgraph_adapter.py` checks for LangGraph import but routes execution through `SyntheticWorkflowRunner`; whether installed LangGraph changes behavior should be verified if claimed in the paper.
 
-6. **`summarize_results.py` goal routing** — External leakage experiments may be categorized under leakage rows depending on `goal` field in metrics; `paper_tables.py` handles `external_leakage` explicitly—verify which CSV you cite for external vs internal leakage studies.
+6. **Threat-modeling scope** — The code evaluates **canary leakage and utility degradation** in synthetic tasks; it does **not** implement a separate semantic "threat model" artifact (e.g. STRIDE diagrams) unless that is defined outside `code/`.
+
+7. **LLM-based attacks** — Attack **generation** is not LLM-driven; only **execution** can use LLM agents in `integration_mode: llm`.
+
+8. **Figure generation** — Tables and CSVs only; plots for the paper must be produced externally from `results/summary/`.
+
+9. **`summarize_results.py` goal routing** — External leakage experiments may be categorized under leakage rows depending on `goal` field in metrics; `paper_tables.py` handles `external_leakage` explicitly—verify which CSV you cite for external vs internal leakage studies.

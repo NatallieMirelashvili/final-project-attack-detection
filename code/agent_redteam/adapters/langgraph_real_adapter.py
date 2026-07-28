@@ -6,7 +6,13 @@ import hashlib
 import time
 from typing import Any, Dict, Optional
 
+from agent_redteam.adapters.agent_runner import grade_task_success
 from agent_redteam.adapters.base import AgentSystemAdapter
+from agent_redteam.adapters.calibration import LeakageCalibrator, load_calibration
+from agent_redteam.adapters.langgraph_llm_workflow import (
+    build_langgraph_llm_workflow,
+    initial_state_llm,
+)
 from agent_redteam.adapters.langgraph_real_workflow import (
     _LANGGRAPH_IMPORT_ERROR,
     build_langgraph_workflow,
@@ -16,6 +22,8 @@ from agent_redteam.adapters.langgraph_real_workflow import (
 )
 from agent_redteam.defenses.filters import apply_defense
 from agent_redteam.defenses.defense_config import DefenseConfig
+from agent_redteam.llm.factory import create_llm_client
+from agent_redteam.llm.base import LLMClient
 from agent_redteam.schemas import AttackVariant, RunResult, Task, Trace
 
 
@@ -28,12 +36,29 @@ class LangGraphRealAdapter(AgentSystemAdapter):
     def __init__(self) -> None:
         self._config: Dict[str, Any] = {}
         self._graph: Any = None
+        self._calibrator: LeakageCalibrator = LeakageCalibrator(load_calibration({}))
+        self._llm_client: Optional[LLMClient] = None
+        self._integration_mode: str = "controlled"
 
     def setup(self, config: Dict[str, Any]) -> None:
         self._config = dict(config)
         try_import_langgraph()
-        self._graph = build_langgraph_workflow()
+        self._integration_mode = self._resolve_integration_mode()
+        if self._integration_mode == "llm":
+            self._llm_client = create_llm_client(config)
+            self._graph = build_langgraph_llm_workflow(self._llm_client)
+        else:
+            self._calibrator = LeakageCalibrator(load_calibration(config))
+            self._graph = build_langgraph_workflow(self._calibrator)
         self.system_name = "langgraph_real"
+
+    def _resolve_integration_mode(self) -> str:
+        mode = str(self._config.get("integration_mode", "controlled")).lower().strip()
+        if mode in ("real", "controlled"):
+            return "controlled"
+        if mode == "llm":
+            return "llm"
+        return mode
 
     def run_clean(self, task: Task) -> RunResult:
         return self._execute(task, attack=None, defense=None)
@@ -51,6 +76,7 @@ class LangGraphRealAdapter(AgentSystemAdapter):
 
     def teardown(self) -> None:
         self._graph = None
+        self._llm_client = None
 
     def _task_seed(self, task: Task, attack_id: Optional[str]) -> int:
         key = f"{self._config.get('random_seed', 42)}:{task.id}:{attack_id or 'clean'}"
@@ -68,7 +94,10 @@ class LangGraphRealAdapter(AgentSystemAdapter):
 
         rng_seed = self._task_seed(task, attack.id if attack else None)
         profile = str(self._config.get("calibration_profile", "medium"))
-        state = initial_state(task, attack, rng_seed, profile)
+        if self._integration_mode == "llm":
+            state = initial_state_llm(task, attack, rng_seed, profile)
+        else:
+            state = initial_state(task, attack, rng_seed, profile)
 
         start = time.perf_counter()
         result = self._graph.invoke(state)
@@ -100,6 +129,7 @@ class LangGraphRealAdapter(AgentSystemAdapter):
                 "injected_canary": injected_canary,
                 "injection_variant_id": attack.id if attack else "",
                 "injected_texts_by_channel": injected_by_channel,
+                "integration_mode": self._integration_mode,
             },
         )
 
@@ -107,7 +137,12 @@ class LangGraphRealAdapter(AgentSystemAdapter):
             trace = apply_defense(trace, defense, task.sensitive_canaries)
             final_output = trace.final_output or final_output
 
-        task_success = bool(task.expected_answer) and task.expected_answer in final_output
+        if self._integration_mode == "llm":
+            task_success = grade_task_success(final_output, task.expected_answer)
+        elif attack is None:
+            task_success = grade_task_success(final_output, task.expected_answer)
+        else:
+            task_success = bool(result.get("task_success", True))
 
         return RunResult(
             task_id=task.id,
@@ -120,8 +155,8 @@ class LangGraphRealAdapter(AgentSystemAdapter):
             token_count=int(result.get("token_count", 0)),
             estimated_cost=float(result.get("estimated_cost", 0.0)),
             tool_calls=int(result.get("tool_calls", 0)),
-            retries=0,
-            errors=[],
+            retries=int(result.get("retries", 0)),
+            errors=list(result.get("errors") or []),
             trace=trace,
         )
 
