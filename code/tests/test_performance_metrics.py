@@ -52,3 +52,5 @@ def test_compute_all_performance_metrics():
     assert metrics["utility_drop"] == 1.0
     assert metrics["cost_amplification"] > 0
     assert metrics["latency_increase"] > 0
+    assert metrics["final_output_empty_rate"] == 0.0
+    assert metrics["operational_degradation_score"] > 0

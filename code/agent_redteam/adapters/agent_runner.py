@@ -20,6 +20,9 @@ ROLE_INJECTION_LOCATION = {
     "finalizer": ("user_input",),
 }
 
+_MAX_CONTEXT_CHARS = 800
+_MAX_CONTEXT_ITEMS = 8
+
 
 def _format_injection(canary: str, template: str) -> str:
     return template.replace("{canary}", canary)
@@ -33,6 +36,34 @@ def _record_injection(
     out = dict(injected)
     out.setdefault(channel, []).append(text)
     return out
+
+
+def _truncate_context(text: str, max_chars: int = _MAX_CONTEXT_CHARS) -> str:
+    """Keep Ollama/live prompts within a stable size window."""
+    cleaned = str(text).strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+    return cleaned[: max_chars - 3].rstrip() + "..."
+
+
+def resolve_final_answer_from_state(state: Dict[str, Any], llm_text: str = "") -> str:
+    """Resolve user-visible final output from finalizer text or prior agent messages."""
+    if llm_text and str(llm_text).strip():
+        return str(llm_text).strip()
+    existing = str(state.get("final_answer") or "").strip()
+    if existing:
+        return existing
+    for line in reversed(state.get("inter_agent_messages") or []):
+        if line.startswith("[finalizer]"):
+            body = line.split("]", 1)[-1].strip()
+            if body:
+                return body
+    for line in reversed(state.get("inter_agent_messages") or []):
+        if line.startswith("[") and "]" in line:
+            body = line.split("]", 1)[-1].strip()
+            if body:
+                return body
+    return ""
 
 
 def build_llm_metadata(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -143,12 +174,30 @@ def run_agent_step(
         Message(role="system", content=system_prompt),
         Message(role="user", content=user_prompt),
     ]
-    for msg in working_state.get("inter_agent_messages") or []:
-        messages.append(Message(role="assistant", content=str(msg), name="context"))
-    for ctx in working_state.get("retrieved_context") or []:
-        messages.append(Message(role="user", content=f"[context] {ctx}", name="retriever"))
-    for out in working_state.get("tool_outputs") or []:
-        messages.append(Message(role="tool", content=str(out), name="tool"))
+    for msg in (working_state.get("inter_agent_messages") or [])[-_MAX_CONTEXT_ITEMS:]:
+        messages.append(
+            Message(
+                role="user",
+                content=f"[prior agent] {_truncate_context(str(msg))}",
+                name="context",
+            )
+        )
+    for ctx in (working_state.get("retrieved_context") or [])[-_MAX_CONTEXT_ITEMS:]:
+        messages.append(
+            Message(
+                role="user",
+                content=f"[context] {_truncate_context(str(ctx))}",
+                name="retriever",
+            )
+        )
+    for out in (working_state.get("tool_outputs") or [])[-_MAX_CONTEXT_ITEMS:]:
+        messages.append(
+            Message(
+                role="user",
+                content=f"[tool result] {_truncate_context(str(out))}",
+                name="tool",
+            )
+        )
 
     messages, injected = apply_attack_to_messages(messages, working_state, agent_role)
 
@@ -217,7 +266,15 @@ def run_agent_step(
         delegation.append(f"{label}->retriever: plan ready for {state.get('task_id')}")
 
     if agent_role in ("reviewer", "finalizer"):
-        update["final_answer"] = response.text
+        merged_state = {
+            **working_state,
+            **update,
+            "inter_agent_messages": inter,
+            "retrieved_context": retrieved,
+            "tool_outputs": tool_outputs,
+            "memory_writes": memory_writes,
+        }
+        update["final_answer"] = resolve_final_answer_from_state(merged_state, response.text)
 
     update.update(
         {
@@ -250,7 +307,21 @@ def attack_from_state_dict(state: Dict[str, Any]) -> Optional[AttackVariant]:
     )
 
 
-def grade_task_success(final_output: str, expected_answer: str) -> bool:
-    if not expected_answer:
-        return bool(final_output.strip())
-    return expected_answer in final_output
+def grade_task_success(
+    final_output: str,
+    expected_answer: str,
+    *,
+    task=None,
+    adapter_config=None,
+    grading_mode=None,
+) -> bool:
+    """Backward-compatible wrapper around evaluation.task_grading."""
+    from agent_redteam.evaluation.task_grading import grade_task_success as _grade
+
+    return _grade(
+        final_output,
+        expected_answer,
+        task=task,
+        adapter_config=adapter_config,
+        grading_mode=grading_mode,
+    )

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from agent_redteam.adapters.official_runtime import configure_official_runtime_env
+
+configure_official_runtime_env()
+
 from typing import Any, Dict
 
 from agent_redteam.adapters.base import AgentSystemAdapter

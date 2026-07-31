@@ -1,0 +1,14 @@
+suite_name: live_ollama_medium_full
+description: >
+  Full medium-scale live Ollama suite covering all available Ollama medium configs.
+  Includes degradation runs; use only after the core leakage suite completes successfully.
+fresh: true
+continue_on_error: true
+summarize_at_end: true
+configs:
+  - ../langgraph_real_llm_ollama_leakage_medium.yaml
+  - ../langgraph_real_llm_ollama_external_leakage_medium.yaml
+  - ../langgraph_real_llm_ollama_degradation_medium.yaml
+  - ../agentdojo_real_llm_ollama_leakage_medium.yaml
+  - ../agentdojo_real_llm_ollama_external_leakage_medium.yaml
+  - ../agentdojo_real_llm_ollama_degradation_medium.yaml

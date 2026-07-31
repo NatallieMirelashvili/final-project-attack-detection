@@ -26,6 +26,7 @@ def execute_llm_workflow(
     workflow_fn: Callable[..., LLMWorkflowState],
     system_name: str,
     integration_mode: str = "llm",
+    adapter_config: Optional[Dict[str, Any]] = None,
 ) -> RunResult:
     """Run an LLM workflow and build a RunResult."""
     start = time.perf_counter()
@@ -69,7 +70,12 @@ def execute_llm_workflow(
         trace = apply_defense(trace, defense, task.sensitive_canaries)
         final_output = trace.final_output or final_output
 
-    task_success = grade_task_success(final_output, task.expected_answer)
+    task_success = grade_task_success(
+        final_output,
+        task.expected_answer,
+        task=task,
+        adapter_config=adapter_config,
+    )
 
     return RunResult(
         task_id=task.id,

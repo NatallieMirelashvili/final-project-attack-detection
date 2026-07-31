@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from agent_redteam.attacks.auto_research_v2 import AutoResearchV2AttackGenerator
+from agent_redteam.attacks.degradation_families import (
+    DEGRADATION_FAMILY_ORDER,
+    variant_from_degradation_family,
+)
 from agent_redteam.attacks.families import ATTACK_FAMILIES, variant_from_family, random_family_id
 from agent_redteam.attacks.mutation import mutate_variant, random_variant
 from agent_redteam.attacks.variants import PROMPT_TEMPLATES, TARGET_CHANNELS
@@ -230,6 +234,35 @@ class AutoResearchAttackGenerator(AttackGenerator):
         return list(self.accepted_variants)
 
 
+class DegradationFamilyAttackGenerator(AttackGenerator):
+    """Emit one deterministic degradation family per iteration (0..N-1)."""
+
+    def __init__(self, goal: str, random_seed: int = 42) -> None:
+        if goal != "degradation":
+            raise ValueError("DegradationFamilyAttackGenerator only supports goal=degradation")
+        self.goal = goal
+        self.random_seed = random_seed
+        self._scores: Dict[str, List[float]] = {}
+
+    def generate(self, iteration: int) -> AttackVariant:
+        family_id = DEGRADATION_FAMILY_ORDER[iteration % len(DEGRADATION_FAMILY_ORDER)]
+        return variant_from_degradation_family(
+            family_id,
+            f"degfam_{iteration:04d}",
+            metadata_extra={"iteration": iteration, "random_seed": self.random_seed},
+        )
+
+    def record_score(self, variant: AttackVariant, score: float, **kwargs: Any) -> None:
+        family = str(variant.metadata.get("degradation_family", "unknown"))
+        self._scores.setdefault(family, []).append(float(score))
+
+    def family_score_summary(self) -> Dict[str, float]:
+        return {
+            family: (sum(scores) / len(scores) if scores else 0.0)
+            for family, scores in self._scores.items()
+        }
+
+
 def get_attack_generator(
     name: str,
     goal: str,
@@ -253,6 +286,7 @@ def get_attack_generator(
         "random": RandomAttackGenerator,
         "manual_baseline": ManualBaselineAttackGenerator,
         "auto_research": AutoResearchAttackGenerator,
+        "degradation_families": DegradationFamilyAttackGenerator,
     }
     cls = generators.get(name, RandomAttackGenerator)
     return cls(goal=goal, random_seed=random_seed)

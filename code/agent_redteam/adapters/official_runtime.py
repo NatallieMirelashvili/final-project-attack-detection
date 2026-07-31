@@ -2,7 +2,18 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any, Tuple
+
+
+def configure_official_runtime_env() -> None:
+    """Disable third-party telemetry before official framework imports/runs."""
+    os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
+    os.environ["CREWAI_DISABLE_TRACKING"] = "true"
+    os.environ["OTEL_SDK_DISABLED"] = "true"
+    os.environ.setdefault("CREWAI_TELEMETRY_OPT_OUT", "true")
+    os.environ.setdefault("CREWAI_TRACING_ENABLED", "false")
+    os.environ.setdefault("ANONYMIZED_TELEMETRY", "false")
 
 AUTOGEN_OFFICIAL_IMPORT_ERROR = (
     "Official AutoGen is not installed. Install optional dependency with: "
@@ -17,6 +28,7 @@ CREWAI_OFFICIAL_IMPORT_ERROR = (
 
 def try_import_autogen_official() -> Tuple[Any, Any, Any, Any]:
     """Import official AutoGen agent-chat APIs or raise ImportError."""
+    configure_official_runtime_env()
     try:
         from autogen_agentchat.agents import AssistantAgent
         from autogen_agentchat.conditions import MaxMessageTermination
@@ -29,6 +41,7 @@ def try_import_autogen_official() -> Tuple[Any, Any, Any, Any]:
 
 def try_import_crewai_official() -> Tuple[Any, Any, Any, Any]:
     """Import official CrewAI APIs or raise ImportError."""
+    configure_official_runtime_env()
     try:
         from crewai import Agent, Crew, Process, Task
     except ImportError as exc:
@@ -50,3 +63,6 @@ def is_crewai_official_available() -> bool:
         return True
     except ImportError:
         return False
+
+
+configure_official_runtime_env()

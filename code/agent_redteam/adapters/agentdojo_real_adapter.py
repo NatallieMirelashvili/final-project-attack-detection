@@ -139,7 +139,12 @@ class AgentDojoRealAdapter(AgentSystemAdapter):
             final_output = trace.final_output or final_output
 
         if self._integration_mode == "llm":
-            task_success = grade_task_success(final_output, task.expected_answer)
+            task_success = grade_task_success(
+                final_output,
+                task.expected_answer,
+                task=task,
+                adapter_config=self._config,
+            )
         elif attack is None:
             task_success = grade_task_success(final_output, task.expected_answer)
         else:

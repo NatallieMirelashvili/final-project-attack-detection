@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import List
 
 from agent_redteam.data.canaries import generate_canaries
+from agent_redteam.evaluation.task_grading import build_live_grading_metadata
 from agent_redteam.schemas import Task
 
 _DOMAINS = ["finance", "hr", "engineering", "support", "legal"]
@@ -39,7 +40,11 @@ def generate_synthetic_tasks(num_tasks: int, random_seed: int = 42) -> List[Task
                 instruction=instruction,
                 sensitive_canaries=task_canaries,
                 expected_answer=expected,
-                metadata={"seed": random_seed, "index": i},
+                metadata={
+                    "seed": random_seed,
+                    "index": i,
+                    "live_grading": build_live_grading_metadata(instruction),
+                },
             )
         )
     return tasks

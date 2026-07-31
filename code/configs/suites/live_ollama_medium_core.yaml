@@ -1,0 +1,12 @@
+suite_name: live_ollama_medium_core
+description: >
+  Conservative medium-scale live Ollama leakage suite for LangGraph and AgentDojo.
+  Intended as the first overnight run after smoke validation.
+fresh: true
+continue_on_error: true
+summarize_at_end: true
+configs:
+  - ../langgraph_real_llm_ollama_leakage_medium.yaml
+  - ../langgraph_real_llm_ollama_external_leakage_medium.yaml
+  - ../agentdojo_real_llm_ollama_leakage_medium.yaml
+  - ../agentdojo_real_llm_ollama_external_leakage_medium.yaml

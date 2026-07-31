@@ -1,0 +1,12 @@
+suite_name: live_ollama_small_degradation_all
+description: >
+  Small-scale live Ollama degradation-only suite with six targeted degradation families.
+  Scale: num_tasks=4, num_iterations=6 (28 runs / 6 variants per config).
+fresh: true
+continue_on_error: true
+summarize_at_end: true
+configs:
+  - ../langgraph_real_llm_ollama_degradation_small.yaml
+  - ../agentdojo_real_llm_ollama_degradation_small.yaml
+  - ../autogen_official_llm_ollama_degradation_small.yaml
+  - ../crewai_official_llm_ollama_degradation_small.yaml

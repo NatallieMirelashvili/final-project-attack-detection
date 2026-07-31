@@ -9,7 +9,7 @@ from agent_redteam.adapters.base import AgentSystemAdapter
 from agent_redteam.adapters.crewai_official_workflow import run_crewai_official_workflow
 from agent_redteam.adapters.llm_adapter_helpers import execute_llm_workflow
 from agent_redteam.adapters.llm_workflow_state import initial_state_llm
-from agent_redteam.adapters.official_runtime import try_import_crewai_official
+from agent_redteam.adapters.official_runtime import configure_official_runtime_env, try_import_crewai_official
 from agent_redteam.defenses.defense_config import DefenseConfig
 from agent_redteam.schemas import AttackVariant, RunResult, Task, Trace
 
@@ -25,6 +25,7 @@ class CrewAIOfficialAdapter(AgentSystemAdapter):
         self._integration_mode: str = "llm"
 
     def setup(self, config: Dict[str, Any]) -> None:
+        configure_official_runtime_env()
         self._config = dict(config)
         try_import_crewai_official()
         self._integration_mode = self._resolve_integration_mode()
@@ -79,6 +80,7 @@ class CrewAIOfficialAdapter(AgentSystemAdapter):
             workflow_fn=_workflow,
             system_name=self.system_name,
             integration_mode="llm",
+            adapter_config=self._config,
         )
 
     def collect_trace(self, run_result: RunResult) -> Trace:

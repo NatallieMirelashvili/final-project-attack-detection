@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import time
 from typing import Any, Dict, List
 
@@ -13,7 +12,7 @@ from agent_redteam.adapters.llm_workflow_state import (
     merge_state,
     record_injection,
 )
-from agent_redteam.adapters.official_runtime import try_import_crewai_official
+from agent_redteam.adapters.official_runtime import configure_official_runtime_env, try_import_crewai_official
 from agent_redteam.goals import is_leakage_goal
 from agent_redteam.llm.crewai_model_client import ProjectMockCrewAILLM, build_crewai_llm
 
@@ -134,10 +133,8 @@ def run_crewai_official_workflow(
     adapter_config: Dict[str, Any],
 ) -> LLMWorkflowState:
     """Run the official CrewAI sequential crew workflow."""
+    configure_official_runtime_env()
     Agent, Task, Crew, Process = try_import_crewai_official()
-
-    os.environ.setdefault("CREWAI_TELEMETRY_OPT_OUT", "true")
-    os.environ.setdefault("OTEL_SDK_DISABLED", "true")
 
     task_context = {
         "task_id": state.get("task_id"),

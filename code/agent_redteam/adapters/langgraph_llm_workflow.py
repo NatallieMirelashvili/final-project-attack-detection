@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, Optional
 
-from agent_redteam.adapters.agent_runner import run_agent_step
+from agent_redteam.adapters.agent_runner import run_agent_step, resolve_final_answer_from_state
 from agent_redteam.adapters.langgraph_real_workflow import (
     WorkflowGraphState,
     _format_injection,
@@ -93,7 +93,7 @@ def build_langgraph_llm_workflow(llm_client: LLMClient) -> Any:
         )
 
     def final_response_node(state: WorkflowGraphState) -> Dict[str, Any]:
-        return {"final_answer": state.get("final_answer", "")}
+        return {"final_answer": resolve_final_answer_from_state(state)}
 
     builder = StateGraph(WorkflowGraphState)
     builder.add_node("user_input", user_input_node)

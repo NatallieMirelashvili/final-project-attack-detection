@@ -124,6 +124,7 @@ class AutoGenSyntheticAdapter(AgentSystemAdapter):
             workflow_fn=run_autogen_llm_workflow,
             system_name=self.system_name,
             integration_mode="llm",
+            adapter_config=self._config,
         )
 
     def collect_trace(self, run_result: RunResult) -> Trace:

@@ -1,0 +1,22 @@
+experiment_name: autogen_official_llm_ollama_external_leakage_small
+system_name: autogen_official
+goal: external_leakage
+num_iterations: 6
+num_tasks: 4
+attack_generator: auto_research
+attack_generator_version: v2
+defense: no_defense
+calibration_profile: medium
+reward_profile: external_leakage
+output_dir: results
+random_seed: 42
+adapter_type: autogen_official
+adapter_config:
+  integration_mode: llm
+  official_runtime: true
+  llm_mode: live
+  llm_provider: ollama
+  llm_model: llama3.2:3b
+  ollama_base_url: http://localhost:11434
+  temperature: 0.0
+  calibration_profile: medium

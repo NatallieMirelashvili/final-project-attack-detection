@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import shutil
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -14,7 +15,7 @@ from agent_redteam.adapters.adapter_factory import create_adapter_from_config
 from agent_redteam.adapters.base import AgentSystemAdapter
 from agent_redteam.adapters.finalizer_exposure import resolve_finalizer_mode
 from agent_redteam.attacks.auto_research_v2 import AutoResearchV2AttackGenerator
-from agent_redteam.attacks.generators import AutoResearchAttackGenerator, get_attack_generator
+from agent_redteam.attacks.generators import AutoResearchAttackGenerator, DegradationFamilyAttackGenerator, get_attack_generator
 from agent_redteam.defenses.defense_config import get_defense
 from agent_redteam.data.synthetic_tasks import generate_synthetic_tasks
 from agent_redteam.evaluation.leakage_metrics import (
@@ -69,10 +70,56 @@ def _variant_to_dict(v: AttackVariant) -> Dict[str, Any]:
     return asdict(v)
 
 
+def _build_degradation_family_diagnostics(
+    clean_runs: List[RunResult],
+    variant_records: List[Dict[str, Any]],
+    all_runs: List[RunResult],
+) -> Dict[str, Any]:
+    """Per-family degradation metrics for targeted sweeps."""
+    by_variant: Dict[str, List[RunResult]] = {}
+    for run in all_runs:
+        if not run.attack_variant_id:
+            continue
+        by_variant.setdefault(run.attack_variant_id, []).append(run)
+
+    family_metrics: Dict[str, Dict[str, Any]] = {}
+    for record in variant_records:
+        variant_dict = record.get("variant") or {}
+        variant_id = str(variant_dict.get("id", ""))
+        family = str(
+            (variant_dict.get("metadata") or {}).get("degradation_family")
+            or (variant_dict.get("metadata") or {}).get("attack_family")
+            or "unknown"
+        )
+        attacked = by_variant.get(variant_id, [])
+        perf = compute_all_performance_metrics(clean_runs, attacked)
+        family_metrics[family] = {
+            "variant_id": variant_id,
+            "iteration": record.get("iteration"),
+            **perf,
+        }
+
+    def _best_by(key: str) -> Dict[str, Any]:
+        if not family_metrics:
+            return {"family": None, "value": 0.0}
+        best_family = max(family_metrics, key=lambda f: float(family_metrics[f].get(key, 0.0)))
+        return {"family": best_family, "value": float(family_metrics[best_family].get(key, 0.0))}
+
+    return {
+        "by_family": family_metrics,
+        "strongest_by_utility_drop": _best_by("utility_drop"),
+        "strongest_by_operational_degradation_score": _best_by(
+            "operational_degradation_score"
+        ),
+    }
+
+
 class ExperimentRunner:
-    def __init__(self, config: ExperimentConfig) -> None:
+    def __init__(self, config: ExperimentConfig, *, fresh: bool = False) -> None:
         self.config = config
         self.output_path = Path(config.output_dir) / config.experiment_name
+        if fresh and self.output_path.exists():
+            shutil.rmtree(self.output_path)
         self.output_path.mkdir(parents=True, exist_ok=True)
 
     def run(self) -> Dict[str, Any]:
@@ -171,6 +218,14 @@ class ExperimentRunner:
         attacked_all = [r for r in all_runs if r.attack_variant_id]
         metrics: Dict[str, Any] = build_experiment_metadata(config)
         metrics["performance"] = compute_all_performance_metrics(clean_runs, attacked_all)
+        if config.goal == "degradation":
+            metrics["degradation_diagnostics"] = _build_degradation_family_diagnostics(
+                clean_runs, variant_records, all_runs
+            )
+            if isinstance(generator, DegradationFamilyAttackGenerator):
+                metrics["degradation_diagnostics"]["family_score_summary"] = (
+                    generator.family_score_summary()
+                )
         if config.goal == "external_leakage":
             metrics["external_leakage"] = compute_all_external_leakage_metrics(
                 attacked_all, tasks_map
@@ -238,8 +293,26 @@ class ExperimentRunner:
                     "tool_call_increase",
                     "retry_rate",
                     "loop_or_failure_rate",
+                    "final_output_empty_rate",
+                    "operational_degradation_score",
                 ]
             ]
+            diag = metrics.get("degradation_diagnostics", {})
+            for key in ("strongest_by_utility_drop", "strongest_by_operational_degradation_score"):
+                entry = diag.get(key) or {}
+                if entry.get("family"):
+                    rows.append(
+                        {
+                            "metric": f"{key}_family",
+                            "value": entry.get("family", ""),
+                        }
+                    )
+                    rows.append(
+                        {
+                            "metric": f"{key}_value",
+                            "value": entry.get("value", 0.0),
+                        }
+                    )
 
         for v, s in best_variants:
             rows.append({"metric": f"best_variant_{v.id}", "value": s})

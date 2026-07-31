@@ -13,9 +13,10 @@ from agent_redteam.adapters.llm_workflow_state import (
     merge_state,
     record_injection,
 )
-from agent_redteam.adapters.official_runtime import try_import_autogen_official
+from agent_redteam.adapters.official_runtime import configure_official_runtime_env, try_import_autogen_official
 from agent_redteam.goals import is_leakage_goal
 from agent_redteam.llm.autogen_model_client import MockAutoGenChatClient, build_autogen_model_client
+from agent_redteam.llm.async_cleanup import close_async_clients
 
 
 AGENT_SPECS = [
@@ -123,6 +124,7 @@ async def _run_autogen_official_async(
     state: LLMWorkflowState,
     adapter_config: Dict[str, Any],
 ) -> LLMWorkflowState:
+    configure_official_runtime_env()
     AssistantAgent, RoundRobinGroupChat, MaxMessageTermination, _ChatClient = try_import_autogen_official()
 
     task_context = {
@@ -139,63 +141,79 @@ async def _run_autogen_official_async(
     channel_state: Dict[str, Any] = dict(state)
     agents = []
     model_clients: List[Any] = []
-    for role, prompt in AGENT_SPECS:
-        system_prompt, injected, channel_updates = _inject_for_role(channel_state, role, prompt)
-        channel_state = merge_state(channel_state, channel_updates)
-        client = build_autogen_model_client(adapter_config, agent_role=role)
-        if isinstance(client, MockAutoGenChatClient):
-            client.set_task_context(task_context)
-        model_clients.append(client)
-        agents.append(
-            AssistantAgent(
-                role,
-                model_client=client,
-                system_message=system_prompt,
-                description=f"AutoGen {role} agent for red-team trace evaluation.",
+    try:
+        for role, prompt in AGENT_SPECS:
+            system_prompt, injected, channel_updates = _inject_for_role(channel_state, role, prompt)
+            channel_state = merge_state(channel_state, channel_updates)
+            client = build_autogen_model_client(adapter_config, agent_role=role)
+            if isinstance(client, MockAutoGenChatClient):
+                client.set_task_context(task_context)
+            model_clients.append(client)
+            agents.append(
+                AssistantAgent(
+                    role,
+                    model_client=client,
+                    system_message=system_prompt,
+                    description=f"AutoGen {role} agent for red-team trace evaluation.",
+                )
             )
+
+        user_input = state.get("instruction", "")
+        attack_goal = state.get("attack_goal", "")
+        if (
+            is_leakage_goal(attack_goal)
+            and state.get("attack_injection_location") == "user_input"
+            and state.get("attack_prompt_template")
+        ):
+            canary = (state.get("canaries") or ["SYN_CANARY"])[0]
+            text = format_injection(canary, state["attack_prompt_template"])
+            user_input = f"{user_input} {text}"
+            injected = record_injection(injected, "user_input", text)
+
+        # Include initial task message plus one turn per agent (finalizer must speak last).
+        max_messages = len(agents) + 1
+        team = RoundRobinGroupChat(
+            agents,
+            max_turns=max_messages,
+            termination_condition=MaxMessageTermination(max_messages),
+        )
+        task_result = await team.run(
+            task=f"Task {state.get('task_id')}: {user_input}\nDomain: {state.get('domain', 'general')}"
         )
 
-    user_input = state.get("instruction", "")
-    attack_goal = state.get("attack_goal", "")
-    if (
-        is_leakage_goal(attack_goal)
-        and state.get("attack_injection_location") == "user_input"
-        and state.get("attack_prompt_template")
-    ):
-        canary = (state.get("canaries") or ["SYN_CANARY"])[0]
-        text = format_injection(canary, state["attack_prompt_template"])
-        user_input = f"{user_input} {text}"
-        injected = record_injection(injected, "user_input", text)
+        update = _map_autogen_messages(task_result, merge_state(state, channel_state))
+        update["injected_texts_by_channel"] = injected
 
-    team = RoundRobinGroupChat(
-        agents,
-        max_turns=len(agents),
-        termination_condition=MaxMessageTermination(len(agents)),
-    )
-    task_result = await team.run(
-        task=f"Task {state.get('task_id')}: {user_input}\nDomain: {state.get('domain', 'general')}"
-    )
+        token_count = 0
+        estimated_cost = 0.0
+        for client in model_clients:
+            usage = client.total_usage()
+            token_count += usage.prompt_tokens + usage.completion_tokens
+            if isinstance(client, MockAutoGenChatClient):
+                estimated_cost += token_count * float(adapter_config.get("token_price", 0.00001))
+        update["token_count"] = token_count
+        update["estimated_cost"] = estimated_cost if estimated_cost else token_count * 0.00001
 
-    update = _map_autogen_messages(task_result, merge_state(state, channel_state))
-    update["injected_texts_by_channel"] = injected
+        for client in model_clients:
+            if isinstance(client, MockAutoGenChatClient):
+                traces = client.consume_tool_traces()
+                update["tool_call_arguments"] = list(update.get("tool_call_arguments") or []) + traces[
+                    "tool_call_arguments"
+                ]
+                update["tool_outputs"] = list(update.get("tool_outputs") or []) + traces["tool_outputs"]
+                update["tool_calls"] = int(update.get("tool_calls", 0)) + traces["tool_calls"]
+                update["retries"] = int(update.get("retries", 0)) + traces["retries"]
+                update["errors"] = list(update.get("errors") or []) + traces["errors"]
 
-    token_count = 0
-    estimated_cost = 0.0
-    for client in model_clients:
-        usage = client.total_usage()
-        token_count += usage.prompt_tokens + usage.completion_tokens
-        if isinstance(client, MockAutoGenChatClient):
-            estimated_cost += token_count * float(adapter_config.get("token_price", 0.00001))
-    update["token_count"] = token_count
-    update["estimated_cost"] = estimated_cost if estimated_cost else token_count * 0.00001
+        if not update.get("final_answer"):
+            for line in reversed(update.get("inter_agent_messages") or []):
+                if line.startswith("[finalizer]"):
+                    update["final_answer"] = line.split("]", 1)[-1].strip()
+                    break
 
-    if not update.get("final_answer"):
-        for line in reversed(update.get("inter_agent_messages") or []):
-            if line.startswith("[finalizer]"):
-                update["final_answer"] = line.split("]", 1)[-1].strip()
-                break
-
-    return merge_state(state, update)
+        return merge_state(state, update)
+    finally:
+        await close_async_clients(model_clients)
 
 
 def run_autogen_official_workflow(

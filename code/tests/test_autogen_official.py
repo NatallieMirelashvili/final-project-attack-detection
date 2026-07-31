@@ -21,6 +21,7 @@ AUTOGEN_OFFICIAL_CONFIGS = [
     "autogen_official_llm_leakage_medium.yaml",
     "autogen_official_llm_external_leakage_medium.yaml",
     "autogen_official_llm_degradation_medium.yaml",
+    "autogen_official_llm_degradation_smoke.yaml",
     "autogen_official_llm_ollama_leakage_smoke.yaml",
     "autogen_official_llm_ollama_external_leakage_smoke.yaml",
     "autogen_official_llm_ollama_degradation_smoke.yaml",
@@ -54,8 +55,8 @@ def test_autogen_official_creates_official_agent_team():
         )
     team = RoundRobinGroupChat(
         agents,
-        max_turns=5,
-        termination_condition=MaxMessageTermination(5),
+        max_turns=6,
+        termination_condition=MaxMessageTermination(6),
     )
     assert team.__class__.__name__ == "RoundRobinGroupChat"
 
@@ -89,10 +90,28 @@ def test_autogen_official_clean_run():
     adapter = AutoGenOfficialAdapter()
     adapter.setup({"integration_mode": "llm", "llm_mode": "mock", "random_seed": 42})
     tasks = generate_synthetic_tasks(2, 42)
-    clean = adapter.run_clean(tasks[0])
+    task = tasks[0]
+    clean = adapter.run_clean(task)
     assert clean.system_name == "autogen_official"
+    assert clean.final_output.strip()
+    assert clean.task_success is True
     assert not clean.final_output.startswith("Answer:")
+    assert f"Answer: {task.expected_answer}" != clean.final_output.strip()
     assert any("official_runtime" in line for line in clean.trace.logs)
+    assert any(line.startswith("[finalizer]") for line in clean.trace.inter_agent_messages)
+    adapter.teardown()
+
+
+def test_autogen_official_clean_finalizer_message_in_trace():
+    adapter = AutoGenOfficialAdapter()
+    adapter.setup({"integration_mode": "llm", "llm_mode": "mock", "random_seed": 42})
+    tasks = generate_synthetic_tasks(2, 42)
+    clean = adapter.run_clean(tasks[0])
+    finalizer_lines = [
+        line for line in clean.trace.inter_agent_messages if line.startswith("[finalizer]")
+    ]
+    assert finalizer_lines
+    assert clean.final_output in finalizer_lines[0] or finalizer_lines[0].endswith(clean.final_output)
     adapter.teardown()
 
 
@@ -146,3 +165,43 @@ def test_autogen_official_leakage_emergent_from_messages():
     )
     assert canary in trace_text
     adapter.teardown()
+
+
+def test_autogen_official_degradation_smoke_experiment(tmp_path):
+    from agent_redteam.experiments.runner import ExperimentRunner, load_config
+
+    output = str(tmp_path / "results")
+    cfg_path = tmp_path / "autogen_official_degradation_smoke.yaml"
+    cfg_path.write_text(
+        f"""
+experiment_name: autogen_official_llm_degradation_smoke
+system_name: autogen_official
+goal: degradation
+num_iterations: 2
+num_tasks: 2
+attack_generator: auto_research
+attack_generator_version: v2
+defense: no_defense
+calibration_profile: medium
+scoring_weights:
+  utility_drop: 1.0
+  cost_amplification: 0.3
+  tool_call_increase: 0.2
+output_dir: {output}
+random_seed: 42
+adapter_type: autogen_official
+adapter_config:
+  integration_mode: llm
+  official_runtime: true
+  llm_mode: mock
+  calibration_profile: medium
+""",
+        encoding="utf-8",
+    )
+    summary = ExperimentRunner(load_config(cfg_path)).run()
+    out_dir = Path(output) / "autogen_official_llm_degradation_smoke"
+    assert out_dir.is_dir()
+    assert (out_dir / "metrics_summary.json").is_file()
+    assert (out_dir / "runs.jsonl").is_file()
+    assert (out_dir / "variants.jsonl").is_file()
+    assert summary.get("performance", {}).get("utility_drop") is not None
