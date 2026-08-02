@@ -18,8 +18,10 @@ env/
 .coverage
 htmlcov/
 
-# Results
+# Results (raw experiment outputs; paper-ready copies live under docs/results/)
 results/
+!docs/results/
+!docs/results/**
 
 # IDE
 .idea/

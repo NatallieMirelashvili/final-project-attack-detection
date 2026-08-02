@@ -1,0 +1,5 @@
+system,leakage_asr,internal_leakage_rate,final_output_leakage_rate,clean_task_success_rate,attacked_task_success_rate
+LangGraph,1.0,1.0,0.375,1.0,1.0
+AgentDojo,0.9583333333333334,0.9583333333333334,0.08333333333333333,1.0,1.0
+AutoGen official,1.0,1.0,0.4583333333333333,1.0,0.9583333333333334
+CrewAI official,1.0,1.0,0.2916666666666667,1.0,0.9166666666666666

@@ -417,8 +417,9 @@ def _build_results_draft(
     lines.append("- Small sample size (4 tasks, 6 variants) limits statistical confidence.")
     lines.append("- Single model (`llama3.2:3b`) and local Ollama runtime; results may not generalize.")
     lines.append("- Medium pilot used a different attack generator (auto-research vs. degradation families).")
+    lines.append("- Smoke configurations were used for infrastructure validation only and are not included in these result tables.")
     lines.append("- Summarizer routing for external leakage in legacy CSV exports requires correction before final tables.")
-    lines.append("- Findings are exploratory and should not be interpreted as definitive benchmark rankings.")
+    lines.append("- Findings are exploratory and should not be interpreted as final benchmark rankings.")
     lines.append("")
     return "\n".join(lines)
 

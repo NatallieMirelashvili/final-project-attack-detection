@@ -1,0 +1,5 @@
+system,clean_task_success_rate,attacked_task_success_rate,utility_drop,operational_degradation_score,strongest_family_by_utility_drop,strongest_family_by_operational_score
+LangGraph,1.0,1.0,0.0,0.018518518518518504,verification_loop,verification_loop
+AgentDojo,1.0,1.0,0.0,0.0,verification_loop,verification_loop
+AutoGen official,1.0,0.9583333333333334,0.04166666666666663,0.020826190701376895,priority_conflict,priority_conflict
+CrewAI official,1.0,0.9583333333333334,0.04166666666666663,0.010416666666666666,priority_conflict,priority_conflict
