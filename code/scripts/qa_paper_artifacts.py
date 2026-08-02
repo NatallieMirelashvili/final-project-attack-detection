@@ -1,29 +1,51 @@
-"""QA validation for paper-ready artifacts against source CSVs."""
+"""QA validation for paper-ready artifacts against source analysis CSVs."""
 
 from __future__ import annotations
 
+import argparse
 import csv
-import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 ROOT = Path(__file__).resolve().parents[1]
-ANALYSIS = ROOT / "results" / "analysis"
-
-METRICS = ANALYSIS / "live_ollama_small_metrics.csv"
-FAMILY = ANALYSIS / "degradation_family_metrics.csv"
-
-PAPER_MD = ANALYSIS / "paper_tables.md"
-DRAFT_MD = ANALYSIS / "paper_results_draft.md"
-VALUES_MD = ANALYSIS / "paper_table_values.md"
-LEAK_CSV = ANALYSIS / "paper_leakage_table.csv"
-EXT_CSV = ANALYSIS / "paper_external_leakage_table.csv"
-DEG_CSV = ANALYSIS / "paper_degradation_table.csv"
+DEFAULT_SOURCE_DIR = ROOT / "results" / "analysis"
+DEFAULT_PAPER_DIR = ROOT / "docs" / "results" / "live_ollama_small"
 
 TOL = 1e-9
-errors: List[str] = []
-warnings: List[str] = []
+
+SOURCE_MISSING_MSG = """\
+Source analysis directory not found: {path}
+
+Raw experiment outputs and generated analysis files live under code/results/, which is
+ignored by git. Regenerate locally before running QA:
+
+  python scripts/compile_small_report.py
+  python scripts/build_paper_tables.py
+
+Then copy updated artifacts into docs/results/live_ollama_small/ if needed.
+"""
+
+
+def parse_args(argv: List[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Validate paper-ready docs against local analysis CSVs."
+    )
+    parser.add_argument(
+        "--source-dir",
+        type=Path,
+        default=DEFAULT_SOURCE_DIR,
+        help="Directory with live_ollama_small_metrics.csv and degradation_family_metrics.csv "
+        "(default: results/analysis)",
+    )
+    parser.add_argument(
+        "--paper-dir",
+        type=Path,
+        default=DEFAULT_PAPER_DIR,
+        help="Directory with paper-ready markdown/CSV artifacts "
+        "(default: docs/results/live_ollama_small)",
+    )
+    return parser.parse_args(argv)
 
 
 def load_csv(path: Path) -> List[Dict[str, str]]:
@@ -52,7 +74,12 @@ def best_family(system: str, key: str, families: List[Dict[str, str]]) -> str:
     return max(cands, key=lambda r: fval(r[key]) or 0.0)["family"]
 
 
-def check_close(a: Optional[float], b: Optional[float], label: str) -> None:
+def check_close(
+    errors: List[str],
+    a: Optional[float],
+    b: Optional[float],
+    label: str,
+) -> None:
     if a is None and b is None:
         return
     if a is None or b is None:
@@ -79,26 +106,80 @@ def parse_md_table_rows(md: str, section: str) -> List[List[str]]:
     return rows
 
 
-def main() -> int:
-    metrics = load_csv(METRICS)
-    families = load_csv(FAMILY)
+def resolve_dir(path: Path, label: str) -> Path:
+    resolved = path if path.is_absolute() else (ROOT / path)
+    if not resolved.is_dir():
+        if label == "source":
+            print(SOURCE_MISSING_MSG.format(path=resolved), file=sys.stderr)
+            sys.exit(2)
+        print(f"Paper artifacts directory not found: {resolved}", file=sys.stderr)
+        sys.exit(2)
+    return resolved
+
+
+def require_file(path: Path, label: str) -> Path:
+    if not path.is_file():
+        print(f"Missing required {label}: {path}", file=sys.stderr)
+        sys.exit(2)
+    return path
+
+
+def validate(source_dir: Path, paper_dir: Path) -> int:
+    errors: List[str] = []
+    warnings: List[str] = []
+
+    metrics_path = require_file(
+        source_dir / "live_ollama_small_metrics.csv", "source metrics CSV"
+    )
+    family_path = require_file(
+        source_dir / "degradation_family_metrics.csv", "source family metrics CSV"
+    )
+
+    paper_md = require_file(paper_dir / "paper_tables.md", "paper tables markdown")
+    draft_md = require_file(paper_dir / "paper_results_draft.md", "results draft markdown")
+    values_md = require_file(paper_dir / "paper_table_values.md", "paper table values markdown")
+    leak_csv = require_file(paper_dir / "paper_leakage_table.csv", "leakage table CSV")
+    ext_csv = require_file(paper_dir / "paper_external_leakage_table.csv", "external leakage CSV")
+    deg_csv = require_file(paper_dir / "paper_degradation_table.csv", "degradation table CSV")
+
+    metrics = load_csv(metrics_path)
+    families = load_csv(family_path)
     small = [r for r in metrics if r["scale"] == "small"]
 
     leak_src = {r["system"]: r for r in small if r["goal"] == "leakage"}
     ext_src = {r["system"]: r for r in small if r["goal"] == "external_leakage"}
     deg_src = {r["system"]: r for r in small if r["goal"] == "degradation"}
 
-    # CSV checks
-    for row in load_csv(LEAK_CSV):
+    for row in load_csv(leak_csv):
         s = row["system"]
         src = leak_src[s]
-        check_close(fval(row["leakage_asr"]), fval(src["leakage_asr"]), f"leak csv {s} leakage_asr")
-        check_close(fval(row["internal_leakage_rate"]), fval(src["internal_leakage_rate"]), f"leak csv {s} internal")
-        check_close(fval(row["final_output_leakage_rate"]), fval(src["final_output_leakage_rate"]), f"leak csv {s} final")
-        check_close(fval(row["clean_task_success_rate"]), fval(src["clean_task_success_rate"]), f"leak csv {s} clean")
-        check_close(fval(row["attacked_task_success_rate"]), fval(src["attacked_task_success_rate"]), f"leak csv {s} attacked")
+        check_close(errors, fval(row["leakage_asr"]), fval(src["leakage_asr"]), f"leak csv {s} leakage_asr")
+        check_close(
+            errors,
+            fval(row["internal_leakage_rate"]),
+            fval(src["internal_leakage_rate"]),
+            f"leak csv {s} internal",
+        )
+        check_close(
+            errors,
+            fval(row["final_output_leakage_rate"]),
+            fval(src["final_output_leakage_rate"]),
+            f"leak csv {s} final",
+        )
+        check_close(
+            errors,
+            fval(row["clean_task_success_rate"]),
+            fval(src["clean_task_success_rate"]),
+            f"leak csv {s} clean",
+        )
+        check_close(
+            errors,
+            fval(row["attacked_task_success_rate"]),
+            fval(src["attacked_task_success_rate"]),
+            f"leak csv {s} attacked",
+        )
 
-    for row in load_csv(EXT_CSV):
+    for row in load_csv(ext_csv):
         s = row["system"]
         src = ext_src[s]
         for col in [
@@ -108,21 +189,28 @@ def main() -> int:
             "clean_task_success_rate",
             "attacked_task_success_rate",
         ]:
-            check_close(fval(row[col]), fval(src[col]), f"ext csv {s} {col}")
+            check_close(errors, fval(row[col]), fval(src[col]), f"ext csv {s} {col}")
         if "utility_drop" in row:
             errors.append(f"ext csv {s}: utility_drop column must not appear")
 
-    for row in load_csv(DEG_CSV):
+    for row in load_csv(deg_csv):
         s = row["system"]
         src = deg_src[s]
-        check_close(fval(row["utility_drop"]), fval(src["utility_drop"]), f"deg csv {s} utility_drop")
+        check_close(errors, fval(row["utility_drop"]), fval(src["utility_drop"]), f"deg csv {s} utility_drop")
         check_close(
+            errors,
             fval(row["operational_degradation_score"]),
             fval(src["operational_degradation_score"]),
             f"deg csv {s} operational",
         )
-        check_close(fval(row["clean_task_success_rate"]), fval(src["clean_task_success_rate"]), f"deg csv {s} clean")
         check_close(
+            errors,
+            fval(row["clean_task_success_rate"]),
+            fval(src["clean_task_success_rate"]),
+            f"deg csv {s} clean",
+        )
+        check_close(
+            errors,
             fval(row["attacked_task_success_rate"]),
             fval(src["attacked_task_success_rate"]),
             f"deg csv {s} attacked",
@@ -134,8 +222,7 @@ def main() -> int:
         ):
             errors.append(f"deg csv {s}: strongest op family mismatch")
 
-    # Markdown table rounded checks
-    md = PAPER_MD.read_text(encoding="utf-8")
+    md = paper_md.read_text(encoding="utf-8")
     for cells in parse_md_table_rows(md, "Table A"):
         s = cells[0]
         src = leak_src[s]
@@ -176,53 +263,59 @@ def main() -> int:
         if cells[1:] != expected:
             errors.append(f"paper_tables C {s}: {cells[1:]} != {expected}")
 
-    if "utility drop" in md.lower() and "Table B" in md:
+    if "Table B" in md:
         b_section = md.split("## Table B")[1].split("## Table C")[0].lower()
         if "utility_drop" in b_section or "| utility drop |" in b_section:
             errors.append("Table B mentions utility drop as column")
 
-    # Wording checks
-    draft = DRAFT_MD.read_text(encoding="utf-8").lower()
-    required_phrases = [
+    draft = draft_md.read_text(encoding="utf-8").lower()
+    for phrase in [
         "small-scale exploratory evaluation",
         "preliminary evidence",
         "in this setting",
         "suggests",
-    ]
-    for phrase in required_phrases:
+    ]:
         if phrase not in draft:
             warnings.append(f"draft missing phrase: {phrase}")
 
-    forbidden = ["conclusively proves", "definitively demonstrates", "establishes a new benchmark"]
-    for phrase in forbidden:
+    for phrase in ["conclusively proves", "definitively demonstrates", "establishes a new benchmark"]:
         if phrase in draft:
             errors.append(f"draft contains forbidden claim: {phrase}")
 
-    caveats = [
-        "4 tasks",
-        "6 variant",
-        "llama3.2:3b",
-        "summarizer",
-        "pilot",
-    ]
-    for c in caveats:
-        if c not in draft:
-            warnings.append(f"draft missing caveat keyword: {c}")
+    for caveat in ["4 tasks", "6 variant", "llama3.2:3b", "summarizer", "pilot"]:
+        if caveat not in draft:
+            warnings.append(f"draft missing caveat keyword: {caveat}")
 
     if "smoke" not in draft:
         warnings.append("draft missing smoke-results infrastructure caveat")
 
-    values = VALUES_MD.read_text(encoding="utf-8")
+    values = values_md.read_text(encoding="utf-8")
     if "task_success_side_effect (not degradation)" not in values:
         errors.append("paper_table_values missing side-effect label")
 
+    print(f"Source dir: {source_dir}")
+    print(f"Paper dir:  {paper_dir}")
     print("ERRORS", len(errors))
-    for e in errors:
-        print("  ERROR:", e)
+    for error in errors:
+        print("  ERROR:", error)
     print("WARNINGS", len(warnings))
-    for w in warnings:
-        print("  WARN:", w)
-    return 1 if errors else 0
+    for warning in warnings:
+        print("  WARN:", warning)
+
+    if errors:
+        return 1
+    if warnings:
+        print("QA PASSED with warnings")
+        return 0
+    print("QA PASSED")
+    return 0
+
+
+def main(argv: List[str] | None = None) -> int:
+    args = parse_args(argv)
+    source_dir = resolve_dir(args.source_dir, "source")
+    paper_dir = resolve_dir(args.paper_dir, "paper")
+    return validate(source_dir, paper_dir)
 
 
 if __name__ == "__main__":
