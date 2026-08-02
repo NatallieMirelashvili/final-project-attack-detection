@@ -1,0 +1,185 @@
+\section{Results}
+\label{sec:results}
+
+This section presents the empirical results of the live LLM evaluation. The evaluation was conducted using the local model \texttt{llama3.2:3b} through Ollama, across four agentic systems: LangGraph, AgentDojo, official AutoGen, and official CrewAI. For each system, we evaluated three adversarial objectives: information leakage, external leakage into the final user-visible output, and performance degradation.
+
+The main evaluation is based on a small-scale exploratory suite. Each configuration contains four tasks and six attack variants, resulting in 28 runs per configuration: four clean runs and 24 attacked runs. Overall, the small suite covers 12 configurations, corresponding to four systems and three attack objectives. In addition, we report one medium-scale LangGraph degradation pilot consisting of 104 runs and 12 attack variants. Smoke runs were used only for infrastructure validation and are not treated as experimental evidence.
+
+\subsection{Information Leakage}
+\label{subsec:results_leakage}
+
+Table~\ref{tab:leakage_results} reports the results for the information leakage objective. Leakage attacks were highly effective across all evaluated systems. LangGraph, official AutoGen, and official CrewAI reached a leakage attack success rate (ASR) of 1.000, while AgentDojo reached a slightly lower but still high leakage ASR of 0.958.
+
+A key distinction appears between internal leakage and final-output leakage. Internal leakage was high across all systems, ranging from 0.958 to 1.000. However, the rate at which leaked information reached the final user-visible output varied substantially. AutoGen official showed the highest final-output leakage rate, with 0.458. LangGraph followed with 0.375, CrewAI official with 0.292, and AgentDojo showed the lowest final-output leakage rate, with 0.083.
+
+This suggests that inspecting only the final answer may underestimate leakage risk. Sensitive information may propagate through intermediate agents, messages, memory, or tool outputs even when it is partially filtered before the final response.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{Information leakage results in the small-scale live Ollama evaluation.}
+\label{tab:leakage_results}
+\begin{tabular}{lccccc}
+\hline
+\textbf{System} &
+\textbf{Leakage ASR} &
+\textbf{Internal Leakage} &
+\textbf{Final-output Leakage} &
+\textbf{Clean SR} &
+\textbf{Attacked SR} \\
+\hline
+LangGraph & 1.000 & 1.000 & 0.375 & 1.000 & 1.000 \\
+AgentDojo & 0.958 & 0.958 & 0.083 & 1.000 & 1.000 \\
+AutoGen official & 1.000 & 1.000 & 0.458 & 1.000 & 0.958 \\
+CrewAI official & 1.000 & 1.000 & 0.292 & 1.000 & 0.917 \\
+\hline
+\end{tabular}
+\end{table*}
+
+\subsection{External Leakage}
+\label{subsec:results_external_leakage}
+
+Table~\ref{tab:external_leakage_results} presents the results for the external leakage objective, which measures whether sensitive information reaches the final user-visible output. Compared with internal leakage, external leakage was lower across all systems, but it was still observed in every evaluated system.
+
+LangGraph was the most vulnerable system under this objective, with an external leakage ASR of 0.375 and a final-output leakage rate of 0.375. CrewAI official followed with 0.292, AutoGen official with 0.208, and AgentDojo with 0.167.
+
+The table also reports clean and attacked task success rates. These values are included to show task-success side effects under external leakage attacks. However, these side effects are not treated as degradation results, because the objective of these configurations was leakage rather than performance degradation.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{External leakage results in the small-scale live Ollama evaluation. Task-success changes in this table are treated as side effects of external leakage, not as degradation results.}
+\label{tab:external_leakage_results}
+\begin{tabular}{lccccc}
+\hline
+\textbf{System} &
+\textbf{External Leakage ASR} &
+\textbf{Internal Leakage} &
+\textbf{Final-output Leakage} &
+\textbf{Clean SR} &
+\textbf{Attacked SR} \\
+\hline
+LangGraph & 0.375 & 0.667 & 0.375 & 1.000 & 0.792 \\
+AgentDojo & 0.167 & 0.958 & 0.167 & 1.000 & 1.000 \\
+AutoGen official & 0.208 & 1.000 & 0.208 & 1.000 & 0.750 \\
+CrewAI official & 0.292 & 0.917 & 0.292 & 0.750 & 0.458 \\
+\hline
+\end{tabular}
+\end{table*}
+
+\subsection{Performance Degradation}
+\label{subsec:results_degradation}
+
+Table~\ref{tab:degradation_results} reports the degradation results. Compared with leakage, degradation attacks produced weaker effects. LangGraph and AgentDojo showed no task-success degradation in the small-scale evaluation, with utility drop equal to 0.000. AutoGen official and CrewAI official showed a small but non-zero degradation signal, each with utility drop equal to 0.042.
+
+These results suggest that, in this setting, the evaluated systems were more vulnerable to leakage than to direct performance degradation. In particular, adversarial content was often able to propagate through the workflow, but it did not always reduce task completion success.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{Performance degradation results in the small-scale live Ollama evaluation.}
+\label{tab:degradation_results}
+\begin{tabular}{lcccc}
+\hline
+\textbf{System} &
+\textbf{Clean SR} &
+\textbf{Attacked SR} &
+\textbf{Utility Drop} &
+\textbf{Operational Degradation} \\
+\hline
+LangGraph & 1.000 & 1.000 & 0.000 & 0.019 \\
+AgentDojo & 1.000 & 1.000 & 0.000 & 0.000 \\
+AutoGen official & 1.000 & 0.958 & 0.042 & 0.021 \\
+CrewAI official & 1.000 & 0.958 & 0.042 & 0.010 \\
+\hline
+\end{tabular}
+\end{table*}
+
+\subsection{Degradation Family Analysis}
+\label{subsec:results_degradation_families}
+
+To better understand the weaker degradation signal, we analyzed six degradation families: \texttt{verification\_loop}, \texttt{caution\_abstention}, \texttt{tool\_overuse}, \texttt{priority\_conflict}, \texttt{format\_disruption}, and \texttt{memory\_context\_poisoning}.
+
+Table~\ref{tab:degradation_family_results} summarizes the strongest degradation families per system. The clearest task-success degradation signal came from \texttt{priority\_conflict}. This family produced a per-family utility drop of 0.250 on both official AutoGen and official CrewAI. This suggests that attacks that create conflicting priorities inside the agent workflow are more effective than generic degradation prompts for reducing task success.
+
+The strongest operational signal came from \texttt{verification\_loop} on LangGraph, where it produced an operational degradation score of 0.139. This did not reduce task success, but it increased operational burden. Therefore, operational degradation and task-success degradation should be interpreted separately.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{Strongest degradation-family signals in the small-scale live Ollama evaluation. ``No utility signal'' indicates that all families had utility drop equal to 0.000 for that system.}
+\label{tab:degradation_family_results}
+\begin{tabular}{lcccc}
+\hline
+\textbf{System} &
+\textbf{Strongest Utility Family} &
+\textbf{Family Utility Drop} &
+\textbf{Strongest Operational Family} &
+\textbf{Family Operational Score} \\
+\hline
+LangGraph & No utility signal & 0.000 & \texttt{verification\_loop} & 0.139 \\
+AgentDojo & No utility signal & 0.000 & No operational signal & 0.000 \\
+AutoGen official & \texttt{priority\_conflict} & 0.250 & \texttt{priority\_conflict} & 0.089 \\
+CrewAI official & \texttt{priority\_conflict} & 0.250 & \texttt{priority\_conflict} & 0.062 \\
+\hline
+\end{tabular}
+\end{table*}
+
+\subsection{Medium-Scale Degradation Pilot}
+\label{subsec:results_medium_pilot}
+
+In addition to the small-scale suite, we conducted a medium-scale LangGraph degradation pilot. This run included 104 runs and 12 attack variants. The result remained stable, with clean task success equal to 1.000, attacked task success equal to 1.000, and utility drop equal to 0.000.
+
+This result suggests that the generic degradation setting did not scale into a stronger degradation effect for LangGraph in this configuration. However, this medium pilot used a generic \texttt{auto\_research} degradation setup, whereas the small-scale degradation analysis used targeted degradation families. Therefore, the medium pilot should be interpreted as a preliminary indication only and not as a direct comparison against the family-based degradation results.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{LangGraph medium-scale degradation pilot.}
+\label{tab:medium_degradation_pilot}
+\begin{tabular}{lccccc}
+\hline
+\textbf{System} &
+\textbf{Goal} &
+\textbf{Scale} &
+\textbf{Runs / Variants} &
+\textbf{Clean SR} &
+\textbf{Attacked SR} \\
+\hline
+LangGraph & Degradation & Medium & 104 / 12 & 1.000 & 1.000 \\
+\hline
+\end{tabular}
+\end{table*}
+
+\subsection{Cross-System Comparison}
+\label{subsec:results_cross_system}
+
+Overall, leakage was the strongest and most consistent adversarial objective. All four systems showed high leakage ASR, ranging from 0.958 to 1.000. This indicates that adversarially introduced sensitive information can propagate through live LLM-based agent workflows across different orchestration architectures.
+
+External leakage was lower than internal leakage, but it was still observed in every system. LangGraph showed the highest external leakage ASR, while AgentDojo showed the lowest final-output leakage in the general leakage setting. This suggests that system architecture and finalization behavior influence whether internal leakage becomes visible to the user.
+
+Performance degradation was weaker than leakage. Non-zero utility drop appeared only in official AutoGen and official CrewAI, and even there the overall utility drop was 0.042. The family-level analysis showed that degradation effectiveness depends strongly on the attack mechanism. In particular, \texttt{priority\_conflict} was the most effective family for reducing task success in official runtimes, while \texttt{verification\_loop} produced the strongest operational degradation signal on LangGraph.
+
+\subsection{Summary of Findings}
+\label{subsec:results_summary}
+
+The small-scale live Ollama evaluation leads to five preliminary findings.
+
+First, leakage attacks were consistently effective across the evaluated systems. Internal leakage rates were high across all four systems, suggesting that sensitive information can propagate through intermediate stages of multi-agent workflows.
+
+Second, internal leakage and final-output leakage differed substantially. AgentDojo had high internal leakage but much lower final-output leakage, suggesting stronger filtering at the final response stage.
+
+Third, external leakage reached the final output in every evaluated system. LangGraph showed the highest external leakage ASR, with a value of 0.375.
+
+Fourth, degradation attacks were weaker than leakage attacks. LangGraph and AgentDojo showed no task-success degradation in the small-scale degradation setting, while AutoGen official and CrewAI official showed a small non-zero utility drop of 0.042.
+
+Fifth, degradation effectiveness depended on the attack family. \texttt{priority\_conflict} produced the clearest utility-drop signal on official AutoGen and official CrewAI, while \texttt{verification\_loop} produced the strongest operational signal on LangGraph.
+
+\subsection{Limitations}
+\label{subsec:results_limitations}
+
+These results should be interpreted as a small-scale exploratory evaluation rather than a definitive benchmark. Each small configuration used four tasks and six attack variants, which may introduce variance at the family level. The evaluation used a single local model, \texttt{llama3.2:3b} through Ollama, and results may differ with larger or proprietary models.
+
+The medium-scale degradation result is also limited. It was conducted only for LangGraph and used a generic degradation setup rather than the targeted degradation-family sweep. Therefore, it should be interpreted as a pilot only.
+
+Finally, some operational metrics are treated as secondary diagnostics rather than primary claims. In particular, latency is not used as a primary comparison metric due to cross-system measurement variability. In addition, the current automated summarization pipeline should be corrected before final automated table generation, because external-leakage outputs are currently routed into the degradation summary CSV by the existing grouping logic.
