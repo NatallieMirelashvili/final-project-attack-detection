@@ -1,14 +1,12 @@
 % ----------- Prompt injection and automated attack generation -----------
-
-@misc{greshake2023indirect,
-  title={Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection},
+@inproceedings{greshake2023indirect,
+  title={Not what you've signed up for: Compromising real-world llm-integrated applications with indirect prompt injection},
   author={Greshake, Kai and Abdelnabi, Sahar and Mishra, Shailesh and Endres, Christoph and Holz, Thorsten and Fritz, Mario},
-  year={2023},
-  eprint={2302.12173},
-  archivePrefix={arXiv},
-  primaryClass={cs.CR},
-  doi={10.48550/arXiv.2302.12173}
+  booktitle={Proceedings of the 16th ACM workshop on artificial intelligence and security},
+  pages={79--90},
+  year={2023}
 }
+
 
 @misc{zhu2023promptrobust,
   title={PromptRobust: Towards Evaluating the Robustness of Large Language Models on Adversarial Prompts},
@@ -30,13 +28,18 @@
   doi={10.48550/arXiv.2307.15043}
 }
 
-@inproceedings{liu2024formalizing,
-  title={Formalizing and Benchmarking Prompt Injection Attacks and Defenses},
-  author={Liu, Yupei and Jia, Yuqi and Geng, Runpeng and Jia, Jinyuan and Gong, Neil Zhenqiang},
-  booktitle={33rd USENIX Security Symposium (USENIX Security 24)},
-  year={2024},
-  publisher={USENIX Association},
-  url={https://www.usenix.org/conference/usenixsecurity24/presentation/liu-yupei}
+
+@inproceedings {liu2024formalizing,
+author = {Yupei Liu and Yuqi Jia and Runpeng Geng and Jinyuan Jia and Neil Zhenqiang Gong},
+title = {Formalizing and Benchmarking Prompt Injection Attacks and Defenses},
+booktitle = {33rd USENIX Security Symposium (USENIX Security 24)},
+year = {2024},
+isbn = {978-1-939133-44-1},
+address = {Philadelphia, PA},
+pages = {1831--1847},
+url = {https://www.usenix.org/conference/usenixsecurity24/presentation/liu-yupei},
+publisher = {USENIX Association},
+month = aug
 }
 
 @inproceedings{shi2024judgedeceiver,
@@ -51,25 +54,20 @@
   doi={10.1145/3658644.3690291}
 }
 
-@misc{learningtoinject2026,
+@article{learningtoinject2026,
   title={Learning to Inject: Automated Prompt Injection via Reinforcement Learning},
-  author={Chen, Xin and Zhang, Jie and Tram{\`e}r, Florian},
-  year={2026},
-  eprint={2602.05746},
-  archivePrefix={arXiv},
-  primaryClass={cs.LG},
-  doi={10.48550/arXiv.2602.05746}
+  author={Chen, Xin and Zhang, Jie and Tramer, Florian},
+  journal={arXiv preprint arXiv:2602.05746},
+  year={2026}
 }
 
-@misc{verifiableagenttoagent2026,
+@article{verifiableagenttoagent2026,
   title={David vs. Goliath: Verifiable Agent-to-Agent Jailbreaking via Reinforcement Learning},
   author={Nellessen, Samuel and Kachman, Tal},
-  year={2026},
-  eprint={2602.02395},
-  archivePrefix={arXiv},
-  primaryClass={cs.LG},
-  doi={10.48550/arXiv.2602.02395}
+  journal={arXiv preprint arXiv:2602.02395},
+  year={2026}
 }
+
 
 % ----------- Defenses for LLM-integrated systems -----------
 
@@ -178,4 +176,56 @@
   year={2018},
   publisher={Association for Computing Machinery},
   doi={10.1145/3230833.3232799}
+}
+
+% ----------- Experimental systems and AutoResearch loop -----------
+
+
+@article{agentdojo2024,
+  title={Agentdojo: A dynamic environment to evaluate prompt injection attacks and defenses for llm agents},
+  author={Debenedetti, Edoardo and Zhang, Jie and Balunovic, Mislav and Beurer-Kellner, Luca and Fischer, Marc and Tram{\`e}r, Florian},
+  journal={Advances in Neural Information Processing Systems},
+  volume={37},
+  pages={82895--82920},
+  year={2024}
+}
+
+@misc{autogen2023,
+  title={AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation Framework},
+  author={Wu, Qingyun and Bansal, Gagan and Zhang, Jieyu and Wu, Yiran and Li, Beibin and Zhu, Erkang and Jiang, Li and Zhang, Xiaoyun and Zhang, Shaokun and Liu, Jiale and Awadallah, Ahmed and White, Ryen W. and Burger, Doug and Wang, Chi},
+  year={2023},
+  eprint={2308.08155},
+  archivePrefix={arXiv},
+  primaryClass={cs.AI},
+  doi={10.48550/arXiv.2308.08155}
+}
+
+@software{crewai,
+  author       = {{CrewAIInc}},
+  title        = {CrewAI: Framework for orchestrating role-playing, autonomous AI agents},
+  month        = nov,
+  year         = {2023},
+  publisher    = {GitHub},
+  journal      = {GitHub repository},
+  howpublished = {\url{https://github.com/crewAIInc/crewAI}}
+}
+
+@software{langgraph,
+  author       = {{LangChain AI}},
+  title        = {LangGraph: Building stateful, multi-actor applications with LLMs},
+  month        = jan,
+  year         = {2024},
+  publisher    = {GitHub},
+  journal      = {GitHub repository},
+  howpublished = {\url{https://github.com/langchain-ai/langgraph}}
+}
+
+
+@software{autoresearch,
+  author       = {Karpathy, Andrej},
+  title        = {Autoresearch: A bounded, public loop for automated machine learning experimentation},
+  year         = {2026},
+  publisher    = {GitHub},
+  journal      = {GitHub repository},
+  howpublished = {\url{https://github.com/karpathy/autoresearch}}
 }

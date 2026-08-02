@@ -1,10 +1,31 @@
 \begin{thebibliography}{10}
 
 \bibitem{greshake2023indirect}
-K.~Greshake, S.~Abdelnabi, S.~Mishra, C.~Endres, T.~Holz, and M.~Fritz, ``Not what you've signed up for: Compromising real-world llm-integrated applications with indirect prompt injection,'' 2023.
+K.~Greshake, S.~Abdelnabi, S.~Mishra, C.~Endres, T.~Holz, and M.~Fritz, ``Not what you've signed up for: Compromising real-world llm-integrated applications with indirect prompt injection,'' in {\em Proceedings of the 16th ACM workshop on artificial intelligence and security}, pp.~79--90, 2023.
 
 \bibitem{liu2024formalizing}
-Y.~Liu, Y.~Jia, R.~Geng, J.~Jia, and N.~Z. Gong, ``Formalizing and benchmarking prompt injection attacks and defenses,'' in {\em 33rd USENIX Security Symposium (USENIX Security 24)}, USENIX Association, 2024.
+Y.~Liu, Y.~Jia, R.~Geng, J.~Jia, and N.~Z. Gong, ``Formalizing and benchmarking prompt injection attacks and defenses,'' in {\em 33rd USENIX Security Symposium (USENIX Security 24)}, (Philadelphia, PA), pp.~1831--1847, USENIX Association, Aug. 2024.
+
+\bibitem{agentdojo2024}
+E.~Debenedetti, J.~Zhang, M.~Balunovic, L.~Beurer-Kellner, M.~Fischer, and F.~Tram{\`e}r, ``Agentdojo: A dynamic environment to evaluate prompt injection attacks and defenses for llm agents,'' {\em Advances in Neural Information Processing Systems}, vol.~37, pp.~82895--82920, 2024.
+
+\bibitem{autogen2023}
+Q.~Wu, G.~Bansal, J.~Zhang, Y.~Wu, B.~Li, E.~Zhu, L.~Jiang, X.~Zhang, S.~Zhang, J.~Liu, A.~Awadallah, R.~W. White, D.~Burger, and C.~Wang, ``Autogen: Enabling next-gen llm applications via multi-agent conversation framework,'' 2023.
+
+\bibitem{crewai}
+{CrewAIInc}, ``Crewai: Framework for orchestrating role-playing, autonomous ai agents.'' \url{https://github.com/crewAIInc/crewAI}, Nov. 2023.
+
+\bibitem{langgraph}
+{LangChain AI}, ``Langgraph: Building stateful, multi-actor applications with llms.'' \url{https://github.com/langchain-ai/langgraph}, Jan. 2024.
+
+\bibitem{autoresearch}
+A.~Karpathy, ``Autoresearch: A bounded, public loop for automated machine learning experimentation.'' \url{https://github.com/karpathy/autoresearch}, 2026.
+
+\bibitem{learningtoinject2026}
+X.~Chen, J.~Zhang, and F.~Tramer, ``Learning to inject: Automated prompt injection via reinforcement learning,'' {\em arXiv preprint arXiv:2602.05746}, 2026.
+
+\bibitem{verifiableagenttoagent2026}
+S.~Nellessen and T.~Kachman, ``David vs. goliath: Verifiable agent-to-agent jailbreaking via reinforcement learning,'' {\em arXiv preprint arXiv:2602.02395}, 2026.
 
 \bibitem{zhu2023promptrobust}
 K.~Zhu, J.~Wang, J.~Zhou, Z.~Wang, H.~Chen, Y.~Wang, L.~Yang, W.~Ye, Y.~Zhang, N.~Z. Gong, and X.~Xie, ``Promptrobust: Towards evaluating the robustness of large language models on adversarial prompts,'' 2023.
@@ -15,41 +36,17 @@ A.~Zou, Z.~Wang, N.~Carlini, M.~Nasr, J.~Z. Kolter, and M.~Fredrikson, ``Univers
 \bibitem{shi2024judgedeceiver}
 J.~Shi, Z.~Yuan, Y.~Liu, Y.~Huang, P.~Zhou, L.~Sun, and N.~Z. Gong, ``Optimization-based prompt injection attack to llm-as-a-judge,'' in {\em Proceedings of the 2024 on ACM SIGSAC Conference on Computer and Communications Security}, CCS '24, (New York, NY, USA), pp.~660--674, Association for Computing Machinery, 2024.
 
-\bibitem{learningtoinject2026}
-X.~Chen, J.~Zhang, and F.~Tram{\`e}r, ``Learning to inject: Automated prompt injection via reinforcement learning,'' 2026.
-
-\bibitem{verifiableagenttoagent2026}
-S.~Nellessen and T.~Kachman, ``David vs. goliath: Verifiable agent-to-agent jailbreaking via reinforcement learning,'' 2026.
-
 \bibitem{yao2024survey}
 Y.~Yao, J.~Duan, K.~Xu, Y.~Cai, Z.~Sun, and Y.~Zhang, ``A survey on large language model (llm) security and privacy: The good, the bad, and the ugly,'' {\em High-Confidence Computing}, vol.~4, no.~2, p.~100211, 2024.
-
-\bibitem{yi2025benchmarking}
-J.~Yi, Y.~Xie, B.~Zhu, E.~Kiciman, G.~Sun, X.~Xie, and F.~Wu, ``Benchmarking and defending against indirect prompt injection attacks on large language models,'' in {\em Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining}, KDD '25, Association for Computing Machinery, 2025.
 
 \bibitem{chen2024struq}
 S.~Chen, J.~Piet, C.~Sitawarin, and D.~Wagner, ``Struq: Defending against prompt injection with structured queries,'' 2024.
 \newblock To appear at USENIX Security Symposium 2025.
 
+\bibitem{yi2025benchmarking}
+J.~Yi, Y.~Xie, B.~Zhu, E.~Kiciman, G.~Sun, X.~Xie, and F.~Wu, ``Benchmarking and defending against indirect prompt injection attacks on large language models,'' in {\em Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining}, KDD '25, Association for Computing Machinery, 2025.
+
 \bibitem{jiang2023identifying}
 F.~Jiang, Z.~Xu, L.~Niu, B.~Wang, J.~Jia, B.~Li, and R.~Poovendran, ``Identifying and mitigating vulnerabilities in llm-integrated applications,'' 2023.
-
-\bibitem{tete2024threat}
-S.~B. Tete, ``Threat modelling and risk analysis for large language model (llm)-powered applications,'' 2024.
-
-\bibitem{gadade2025framework}
-B.~Gadade and G.~A. Patil, ``A threat modeling framework for llm system integration leveraging nlp and machine learning,'' {\em Communications on Applied Nonlinear Analysis}, vol.~32, no.~10s, 2025.
-
-\bibitem{adams2024stridegpt}
-M.~Adams and P.~Raghavan, ``Se radio 648: Matthew adams on ai threat modeling and stride gpt.'' Software Engineering Radio podcast, 2024.
-
-\bibitem{xu2012automated}
-D.~Xu, M.~Tu, M.~Sanford, L.~Thomas, D.~Woodraska, and W.~Xu, ``Automated security test generation with formal threat models,'' {\em IEEE Transactions on Dependable and Secure Computing}, vol.~9, no.~4, pp.~526--540, 2012.
-
-\bibitem{tuma2020automating}
-K.~Tuma, L.~Sion, R.~Scandariato, and K.~Yskout, ``Automating the early detection of security design flaws,'' in {\em Proceedings of the ACM/IEEE 23rd International Conference on Model Driven Engineering Languages and Systems}, MODELS '20, pp.~332--342, Association for Computing Machinery, 2020.
-
-\bibitem{johnson2018meta}
-P.~Johnson, R.~Lagerstr{\"o}m, and M.~Ekstedt, ``A meta language for threat modeling and attack simulations,'' in {\em Proceedings of the 13th International Conference on Availability, Reliability and Security}, ARES 2018, pp.~38:1--38:8, Association for Computing Machinery, 2018.
 
 \end{thebibliography}

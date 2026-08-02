@@ -3,53 +3,115 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{greshake2023indirect,liu2024formalizing}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{agentdojo2024}
+\citation{autogen2023}
+\citation{crewai}
+\citation{langgraph}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Agentic and Multi-Agent LLM Systems}{2}{subsection.1.1}\protected@file@percent }
+\citation{autoresearch}
+\citation{learningtoinject2026,verifiableagenttoagent2026}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}AutoResearch-Style Optimization}{3}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Contributions}{3}{subsection.1.3}\protected@file@percent }
 \citation{greshake2023indirect}
+\citation{liu2024formalizing}
 \citation{zhu2023promptrobust}
-\citation{zou2023universal,shi2024judgedeceiver}
+\citation{agentdojo2024}
+\citation{liu2024formalizing,agentdojo2024}
 \citation{zou2023universal}
 \citation{shi2024judgedeceiver}
+\citation{zou2023universal,shi2024judgedeceiver}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{4}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Prompt injection and automated attack generation}{4}{subsection.2.1}\protected@file@percent }
 \citation{learningtoinject2026}
 \citation{verifiableagenttoagent2026}
+\citation{learningtoinject2026,verifiableagenttoagent2026}
 \citation{liu2024formalizing,yao2024survey}
-\citation{liu2024formalizing}
+\citation{liu2024formalizing,chen2024struq}
+\citation{liu2024formalizing,yi2025benchmarking}
 \citation{liu2024formalizing}
 \citation{yi2025benchmarking}
 \citation{liu2024formalizing,yi2025benchmarking}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Related Work}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Prompt injection and automated attack generation}{1}{subsection.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Defenses for LLM-integrated systems}{1}{subsection.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Soft defenses.}{1}{paragraph*.1}\protected@file@percent }
 \citation{chen2024struq,jiang2023identifying}
-\citation{jiang2023identifying}
 \citation{chen2024struq}
+\citation{jiang2023identifying}
 \citation{yao2024survey}
-\citation{yi2025benchmarking,chen2024struq,jiang2023identifying}
-\citation{tete2024threat}
-\citation{gadade2025framework}
-\citation{adams2024stridegpt}
-\citation{xu2012automated}
-\citation{tuma2020automating}
-\citation{johnson2018meta}
-\@writefile{toc}{\contentsline {paragraph}{Hard defenses.}{2}{paragraph*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Threat modeling and automation for LLM systems}{2}{subsection.1.3}\protected@file@percent }
+\citation{chen2024struq,jiang2023identifying,yao2024survey}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Defenses for LLM-integrated systems}{5}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Motivation and Goals}{6}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Research Questions:}{6}{paragraph*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Threat Model}{6}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Attacker Capabilities}{6}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Attack Goals}{7}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Sensitive Information Leakage}{7}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Performance Degradation}{7}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Out of Scope}{8}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Experimental Systems}{8}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}AgentDojo}{8}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}AutoGen}{8}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}CrewAI}{9}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}LangGraph}{9}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Unified Experimental Scenario}{9}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Abstract agent workflow illustrating the execution pipeline and monitored internal communication channels.}}{10}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:workflow}{{1}{10}{Abstract agent workflow illustrating the execution pipeline and monitored internal communication channels}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}AutoResearch Red-Teaming Framework}{10}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Overview}{10}{subsection.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces AutoResearch red-teaming loop.}}{11}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:autoresearch_loop}{{2}{11}{AutoResearch red-teaming loop}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Loop A: Leakage Optimization}{11}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Loop B: Performance Degradation Optimization}{12}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Evaluation Metrics}{13}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Leakage Metrics}{13}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Performance Metrics}{13}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Transferability Metrics}{13}{subsection.7.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Summary of evaluation metrics.}}{14}{table.caption.4}\protected@file@percent }
+\newlabel{tab:metrics_summary}{{1}{14}{Summary of evaluation metrics}{table.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Defense Metrics}{14}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Experimental Design}{15}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Baselines}{15}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Defense Settings}{15}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Experimental Matrix}{16}{subsection.8.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Experimental matrix.}}{16}{table.caption.5}\protected@file@percent }
+\newlabel{tab:exp_matrix}{{2}{16}{Experimental matrix}{table.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Sensitive-information leakage results.}}{17}{table.caption.6}\protected@file@percent }
+\newlabel{tab:leakage_results}{{3}{17}{Sensitive-information leakage results}{table.caption.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Performance degradation results.}}{17}{table.caption.7}\protected@file@percent }
+\newlabel{tab:perf_results}{{4}{17}{Performance degradation results}{table.caption.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Results}{17}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Leakage Results}{17}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Performance Degradation Results}{17}{subsection.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Transferability Results}{17}{subsection.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Defense Results}{17}{subsection.9.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Discussion}{17}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Final Output vs. Internal Exposure}{17}{subsection.10.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Cross-system transferability results.}}{18}{table.caption.8}\protected@file@percent }
+\newlabel{tab:transfer_results}{{5}{18}{Cross-system transferability results}{table.caption.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Defense evaluation.}}{18}{table.caption.9}\protected@file@percent }
+\newlabel{tab:defense_results}{{6}{18}{Defense evaluation}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}AutoResearch vs. Manual Attacks}{18}{subsection.10.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Transferability Across Frameworks}{18}{subsection.10.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.4}Security-Utility Tradeoff}{18}{subsection.10.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {11}Limitations}{18}{section.11}\protected@file@percent }
 \bibstyle{ieeetr}
 \bibdata{bib/references}
 \bibcite{greshake2023indirect}{{1}{}{{}}{{}}}
 \bibcite{liu2024formalizing}{{2}{}{{}}{{}}}
-\bibcite{zhu2023promptrobust}{{3}{}{{}}{{}}}
-\bibcite{zou2023universal}{{4}{}{{}}{{}}}
-\bibcite{shi2024judgedeceiver}{{5}{}{{}}{{}}}
-\bibcite{learningtoinject2026}{{6}{}{{}}{{}}}
-\bibcite{verifiableagenttoagent2026}{{7}{}{{}}{{}}}
-\bibcite{yao2024survey}{{8}{}{{}}{{}}}
-\bibcite{yi2025benchmarking}{{9}{}{{}}{{}}}
-\bibcite{chen2024struq}{{10}{}{{}}{{}}}
-\bibcite{jiang2023identifying}{{11}{}{{}}{{}}}
-\bibcite{tete2024threat}{{12}{}{{}}{{}}}
-\bibcite{gadade2025framework}{{13}{}{{}}{{}}}
-\bibcite{adams2024stridegpt}{{14}{}{{}}{{}}}
-\bibcite{xu2012automated}{{15}{}{{}}{{}}}
-\bibcite{tuma2020automating}{{16}{}{{}}{{}}}
-\bibcite{johnson2018meta}{{17}{}{{}}{{}}}
+\bibcite{agentdojo2024}{{3}{}{{}}{{}}}
+\bibcite{autogen2023}{{4}{}{{}}{{}}}
+\bibcite{crewai}{{5}{}{{}}{{}}}
+\bibcite{langgraph}{{6}{}{{}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {12}Ethical Considerations}{19}{section.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {13}Conclusion}{19}{section.13}\protected@file@percent }
+\bibcite{autoresearch}{{7}{}{{}}{{}}}
+\bibcite{learningtoinject2026}{{8}{}{{}}{{}}}
+\bibcite{verifiableagenttoagent2026}{{9}{}{{}}{{}}}
+\bibcite{zhu2023promptrobust}{{10}{}{{}}{{}}}
+\bibcite{zou2023universal}{{11}{}{{}}{{}}}
+\bibcite{shi2024judgedeceiver}{{12}{}{{}}{{}}}
+\bibcite{yao2024survey}{{13}{}{{}}{{}}}
+\bibcite{chen2024struq}{{14}{}{{}}{{}}}
+\bibcite{yi2025benchmarking}{{15}{}{{}}{{}}}
+\bibcite{jiang2023identifying}{{16}{}{{}}{{}}}
 \providecommand\NAT@force@numbers{}\NAT@force@numbers
-\gdef \@abspage@last{5}
+\gdef \@abspage@last{21}
