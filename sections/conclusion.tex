@@ -3,39 +3,58 @@
 
 \subsection{Final Output vs. Internal Exposure}
 
-This section discusses whether final-output-only evaluation misses important leakage channels. We expect this gap to be especially relevant in multi-agent systems, where internal messages and tool arguments may expose sensitive information even when the final answer is safe.
+Internal leakage was consistently higher than final-output leakage across all four systems. Internal leakage matched the overall leakage ASR exactly in every system (0.958 to 1.000), while final-output leakage ranged from 0.083 to 0.458. The resulting output-only miss rate ranged from 0.542 to 0.875, meaning that between roughly half and seven-eighths of successful leaks would have been invisible to an evaluation that inspected only the final response. AgentDojo illustrates this most clearly: its final-output leakage rate was the lowest of the four systems at 0.083, yet its internal leakage rate was 0.958, nearly identical to the other three systems. A final-output-only evaluation would have reported AgentDojo as comparatively safe, when in fact the canary propagated internally in almost every attacked run. This supports the premise behind RQ1, that final-output-only evaluation substantially underestimates real exposure in agentic and multi-agent systems.
 
-\subsection{AutoResearch vs. Manual Attacks}
+\subsection{Degradation Effectiveness by Attack Family}
 
-This section compares whether AutoResearch-optimized attacks outperform manual and random baselines.
+RQ2 asks how effective the framework's attacks are at degrading task utility. The aggregate small-scale results suggest a weak effect: LangGraph and AgentDojo showed no utility drop, and official AutoGen and official CrewAI showed only 0.042. The family-level results complicate this picture. \texttt{priority\_conflict} alone produced a 0.250 utility drop on both official AutoGen and official CrewAI, six times the aggregate figure, while the other five families contributed close to nothing. The aggregate number is therefore a poor summary of degradation effectiveness: it reflects five ineffective attack mechanisms and one substantially effective one averaged together, not four systems that are each moderately vulnerable to degradation. Degradation effectiveness in this evaluation depended far more on which attack mechanism was tried than on which system was targeted. The medium-scale LangGraph pilot reinforces this. It used real AutoResearch search, not the fixed family sweep, and found no utility drop at all, suggesting that generic search over the shared attack-variant space, without a mechanism specifically designed to create conflicting priorities, did not rediscover an effect the family sweep found directly.
 
-\subsection{Transferability Across Frameworks}
+\subsection{Variation Across Frameworks}
 
-This section analyzes whether attack variants optimized on one framework generalize to other frameworks, domains, or defense settings.
-
-\subsection{Security-Utility Tradeoff}
-
-This section analyzes whether defenses reduce leakage without significantly degrading task utility or increasing operational cost.
+RQ3 asks how leakage and degradation effects vary across frameworks. Leakage varied little: all four systems reached a leakage ASR between 0.958 and 1.000, regardless of architecture. Degradation varied along a different line. Non-zero utility drop appeared only for official AutoGen and official CrewAI, the two systems evaluated through their official runtimes, while LangGraph and AgentDojo, evaluated through dedicated adapters built for this project, showed no utility drop in the small-scale suite. This split matches exactly the real-adapter versus official-runtime distinction introduced in Experimental Systems, though with only two systems on each side, it is not possible to say from this evaluation alone whether official multi-agent runtimes are inherently more susceptible to conflicting-context attacks, or whether this pattern is specific to the six degradation families tested.
 
 % ============================================================
 \section{Limitations}
 
-This work has several limitations:
+This work has several limitations, spanning the scale of the evaluation, the
+design of the search, and what was not evaluated.
 
-\begin{itemize}
-    \item The experiments use synthetic secrets rather than real private data.
-    \item Framework implementations may not reflect all production deployments.
-    \item AutoResearch search quality depends on the defined attack space and scoring function.
-    \item Some semantic leakage may be difficult to detect using exact canary matching alone.
-    \item Results may vary across LLM providers and model versions.
-\end{itemize}
+\textbf{Evaluation scale.} Results come from a small-scale exploratory
+evaluation rather than a definitive benchmark. Each small-scale configuration
+used four tasks and six attack variants, which may introduce variance at the
+family level. The evaluation used a single local model, \texttt{llama3.2:3b}
+through Ollama, and results may differ with larger or proprietary models. The
+medium-scale degradation result was conducted only for LangGraph, using a
+generic degradation setup rather than the targeted family sweep, and should
+be interpreted as a pilot rather than a general finding.
+
+\textbf{Search design and budget.} The AutoResearch search explored only 6 of
+the 1,928 known attack configurations per small-scale run (12 for the
+medium-scale pilot). Of those 6 iterations, only 4 had a prior score to react
+to, since crossover requires at least two previously scored variants. The
+reported results therefore reflect a small, mostly cold-start search budget
+rather than a converged search. Search quality more broadly depends on the
+defined attack space and scoring function, and a different space or reward
+weighting could surface different attack variants.
+
+\textbf{Detection method.} Some semantic leakage may be difficult to detect
+using exact or partial canary matching alone, since a model can paraphrase or
+partially reconstruct a secret without reproducing it verbatim.
+
+\textbf{Scope of comparison.} This work does not include a random or manually
+designed attack baseline, a cross-framework transfer evaluation, or a defense
+comparison.
+
+\textbf{Deployment fidelity.} Canary secrets are synthetic placeholders, not
+data protected by real access controls or output filtering, so measured
+leakage rates reflect propagation through the agent alone.
 
 % ============================================================
 \section{Ethical Considerations}
 
-All experiments are conducted in controlled environments using synthetic data. No real user data, credentials, private documents, or production systems are targeted. The goal of this work is to improve the evaluation and defense of agentic and multi-agent systems.
+All experiments are conducted in controlled environments using synthetic data. The canary secrets used to measure leakage are synthetic markers created solely for measurement, not real credentials or personal information. No real user data, credentials, private documents, or production systems are targeted. The goal of this work is to improve how agentic and multi-agent systems are evaluated for information leakage and performance degradation under adversarial conditions.
 
 % ============================================================
 \section{Conclusion}
 
-This paper proposes an AutoResearch-driven methodology for automated red teaming of agentic and multi-agent systems. The framework evaluates both sensitive-information leakage and performance degradation, while measuring transferability across AgentDojo, AutoGen, CrewAI, and LangGraph. By inspecting both final outputs and internal channels, the proposed evaluation aims to reveal exposure that output-only testing may miss. The expected outcome is a systematic framework for comparing vulnerabilities, defenses, and generalization behavior across modern agent architectures.
+This project developed an AutoResearch-inspired red-teaming framework for agentic and multi-agent LLM systems, in which a heuristic search procedure generates, executes, and scores attack variants against a target system. We evaluated the framework on four systems, LangGraph, AgentDojo, official AutoGen, and official CrewAI, across three objectives: information leakage, leakage into the final output, and performance degradation. Leakage was highly effective across all four systems, with attack success rates between 0.958 and 1.000, and internal-channel leakage consistently exceeded final-output leakage, so an evaluation that inspected only the final output would have substantially underestimated real exposure. Degradation effects were weaker overall and depended strongly on which attack family was used, with \texttt{priority\_conflict} producing the clearest utility-drop signal. Together, these results indicate that internal-channel visibility is a necessary part of evaluating agentic and multi-agent systems.

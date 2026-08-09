@@ -25,21 +25,20 @@ Evaluating only the final output can therefore substantially underestimate how
 exposed such a system really is, and may also miss attacks that degrade task
 performance or increase operational cost without leaking anything at all.
 
-This project investigates that gap directly. We ask (i) whether an automated,
-iterative red-teaming process can discover attacks that exploit the internal
-channels of agentic and multi-agent systems more effectively than random or
-manually designed attacks, and (ii) whether final-output-only evaluation
-indeed misses leakage and degradation that an internal-channel-aware
-evaluation would catch. Rather than hand-crafting every attack variant, we
-adopt an AutoResearch-style loop, described below: an LLM agent proposes an
-attack variant, the variant is run against a target agentic system on a fixed
-task, the outcome is scored against a chosen metric, and the variant is kept or
-discarded before the next is proposed. We instantiate this loop twice, for two
+This project investigates that gap directly. We ask (i) whether an
+automated, iterative red-teaming process can discover effective attacks that
+exploit the internal channels of agentic and multi-agent systems, and (ii)
+whether final-output-only evaluation indeed misses leakage and degradation
+that an internal-channel-aware evaluation would catch. We adopt an
+AutoResearch-style loop, described below: a heuristic search procedure
+generates an attack variant, the variant is run against a target agentic
+system on a fixed task, the outcome is scored against a chosen metric, and
+the variant is kept or discarded before the next is generated. We instantiate this loop twice, for two
 complementary attacker goals: maximizing the rate at which a synthetic canary
 secret is exposed through any channel, final output or internal, and
 degrading task utility and/or amplifying operational cost (extra tool calls,
 latency, tokens) without necessarily leaking a secret. We study both loops
-across four systems -- AgentDojo, AutoGen, CrewAI, and LangGraph, configured
+across four systems - AgentDojo, AutoGen, CrewAI, and LangGraph, configured
 with a shared abstract pipeline so that results are comparable across
 frameworks. Throughout, the attacker only injects content into untrusted
 channels (retrieved documents, tool outputs, task inputs, inter-agent
@@ -80,28 +79,28 @@ automate iterative improvement of training and evaluation pipelines, but the
 underlying generate-evaluate-score-keep/discard cycle does not depend on what
 is being optimized.
 
-This project adapts that cycle to automated red teaming. Here, the LLM agent
-searches not for configurations that improve benign task performance, but for
-attack variants changes to the injected content, its placement within the
-pipeline, the targeted agent, and its phrasing. That increase a chosen
-attack-effectiveness metric against a fixed target system and task. This
-differs from recent reinforcement-learning-based approaches to automated
-prompt injection, which optimize universal adversarial suffixes through
-gradient-based or policy-gradient training over model weights
-\cite{learningtoinject2026,verifiableagenttoagent2026}. Because the
-AutoResearch loop operates on natural-language attack variants that are
-proposed and judged by an LLM agent rather than on model parameters, it
-requires no gradient access and can, in principle, be applied directly to
-closed, black-box agentic systems.
+This project adapts that cycle to automated red teaming, replacing the
+LLM-agent edit step with a heuristic search procedure. The search explores a
+defined space of attack variants, covering the injected content, its
+placement within the pipeline, the targeted agent, and its phrasing, using
+mutation, crossover, and family-based selection to bias future variants
+toward higher-scoring regions of that space. This differs from recent
+reinforcement-learning-based approaches to automated prompt injection, which
+optimize universal adversarial suffixes through gradient-based or
+policy-gradient training over model weights
+\cite{learningtoinject2026,verifiableagenttoagent2026}. Because the search
+operates on discrete natural-language attack variants rather than on model
+parameters, it requires no gradient access and can, in principle, be applied
+directly to closed, black-box agentic systems.
 
 \subsection{Contributions}
 
 This project makes the following contributions:
 \begin{itemize}
     \item We instantiate an AutoResearch-style red-teaming loop for agentic
-    and multi-agent LLM systems, in which an LLM agent iteratively proposes,
-    evaluates, and selects attack variants against a fixed target system and
-    task.
+    and multi-agent LLM systems, in which a heuristic search procedure
+    iteratively generates, evaluates, and selects attack variants against a
+    fixed target system and task.
     \item We define two independent optimization objectives for this loop:
     maximizing the total exposure rate of a synthetic canary secret across
     final-output and internal channels, and maximizing a weighted combination
@@ -111,10 +110,7 @@ This project makes the following contributions:
     inter-agent messages, memory writes, and logs), enabling a direct test of
     whether output-only evaluation underestimates real exposure.
     \item We apply this methodology to four systems spanning single-agent
-    (AgentDojo) and multi-agent (AutoGen, CrewAI, LangGraph) architectures
-    configured with a shared abstract workflow, and study whether attacks
-    optimized on one framework transfer to the others.
-    \item We compare AutoResearch-optimized attacks against clean, random, and
-    manually designed baselines, under a range of prompt-based, guard-agent,
-    redaction, and tool-output-filtering defenses.
+    (AgentDojo) and multi-agent (AutoGen, CrewAI, LangGraph) architectures,
+    configured with a shared abstract workflow so that leakage and
+    degradation behavior can be compared across frameworks.
 \end{itemize}
