@@ -204,52 +204,6 @@ use that as the ground truth while working through this list.
   smoke-run caveat (the one genuinely new fact in that opening) when we reach the
   Results/Discussion pass later in this checklist.
 
-## P1 — Cross-cutting finding to carry into later sections
-
-- [ ] 🔖 **[CLAUDE-FOUND, surfaced while fixing RQ1/RQ2]** The small-scale
-  degradation family results (`priority_conflict` 0.25 utility drop,
-  `verification_loop` 0.139 operational score — the paper's headline degradation
-  numbers) come from `attack_generator: degradation_families`
-  ([generators.py:242-262](../code/agent_redteam/attacks/generators.py#L242-L262)),
-  which deterministically cycles through 6 hand-written templates once each —
-  **no mutation, crossover, or score-guided selection at all.** Mechanically
-  identical to a human manually running 6 pre-written attacks in sequence. Only
-  the *medium-scale* LangGraph degradation pilot uses real `auto_research` v2
-  search, and it found nothing (0.0 utility drop). By contrast, the leakage/
-  external-leakage small-scale results genuinely do come from `auto_research`
-  v2's mutation/crossover/bandit search over the 8 leakage families.
-  **Implication for sections not yet touched:** when we reach
-  `methodology.tex`'s "Loop B: Performance Degradation Optimization" and the
-  Discussion rewrite, do not describe the `priority_conflict`/`verification_loop`
-  finding as something the search "discovered" or "optimized toward" — it was a
-  fixed, exhaustive sweep of 6 pre-authored options, not a product of iterative
-  search. Already correctly reflected in the new RQ2 (deliberately not labeled
-  "AutoResearch-generated"). *(Not from peer/Ravit — found while restructuring
-  RQ1–RQ3.)*
-
-## P1 — Deferred addition (not yet applied)
-
-- [ ] 🔖 **[CLAUDE-FOUND, deferred by user request]** Add a sentence to
-  Section~6 (`methodology.tex`, "AutoResearch Red-Teaming Framework" /
-  Overview) explaining that the search exists specifically to avoid
-  exhaustively testing the full attack space, extending the existing sentence
-  *"provides a systematic alternative to one-off manual attack design"* to also
-  name exhaustive testing as the other alternative being avoided. Section 8
-  already states the concrete number (1,928 known configurations, 6 or 12
-  tried) as supporting evidence.
-  **Important constraint discussed and agreed:** this addition must **not**
-  imply that citing the combination-space size justifies 6 as an *adequate*
-  sample. Verified from code: of the 6 small-scale iterations, iteration 0 is
-  a blind spawn (no history yet) and iteration 1 can only mutate or spawn
-  (crossover needs `len(history) >= 2`, impossible before iteration 2) — so
-  only **4 of 6** iterations ever have a prior score to react to. That's a very
-  small feedback-informed budget by genetic-algorithm/bandit-literature
-  standards. The "why a search at all" rationale and the "is 6 enough"
-  question are separate claims — the first is defensible, the second is not
-  established by it. This "6 of 1,928, only ~4 feedback-informed" caveat must
-  land explicitly in the Limitations reconciliation (item below) rather than
-  being left implied as a strength.
-
 ## P1 — Table/metric scope vs. what's reported
 
 - [x] **Table 1 (evaluation metrics) lists more than is used.** ✅ **Resolved.**
@@ -673,18 +627,6 @@ use that as the ground truth while working through this list.
     project's).
   *(Peer: "צריך להיזהר מהטענה 'AutoResearch optimized'"; Ravit,
   `RavitsRejects.md` §11, "Leakage Optimization Subsection.")*
-- [ ] **Watch list for the Discussion/Conclusion rewrite (P1 items above) — not
-  currently violated, but easy to reintroduce while rewriting.** Verified none of
-  these phrases currently appear in the `.tex` files, so no action needed today;
-  listed here so the rewrite doesn't accidentally add them: claiming AgentDojo is
-  "safe" or "robust" because its final-output leakage is low (internal leakage is
-  still 0.958 — low final-output leakage is filtering behavior, not safety);
-  implying "every degradation family was effective" (several are explicitly
-  "No utility signal" in the family table); implying the medium-scale pilot was
-  run "for all frameworks" (it's LangGraph-only, and `results.tex` is currently
-  careful about this). *(Ravit, `RavitsRejects.md` §21 "Global Claims That Must Be
-  Removed or Softened" — verified as not-yet-present via grep across
-  `sections/*.tex`.)*
 
 ## P3 — LaTeX/formatting
 
