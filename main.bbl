@@ -36,6 +36,18 @@ A.~Zou, Z.~Wang, N.~Carlini, M.~Nasr, J.~Z. Kolter, and M.~Fredrikson, ``Univers
 \bibitem{shi2024judgedeceiver}
 J.~Shi, Z.~Yuan, Y.~Liu, Y.~Huang, P.~Zhou, L.~Sun, and N.~Z. Gong, ``Optimization-based prompt injection attack to llm-as-a-judge,'' in {\em Proceedings of the 2024 on ACM SIGSAC Conference on Computer and Communications Security}, CCS '24, (New York, NY, USA), pp.~660--674, Association for Computing Machinery, 2024.
 
+\bibitem{he2025communication}
+P.~He, Y.~Lin, S.~Dong, H.~Xu, Y.~Xing, and H.~Liu, ``Red-teaming llm multi-agent systems via communication attacks,'' in {\em Findings of the Association for Computational Linguistics: ACL 2025}, (Vienna, Austria), pp.~6726--6747, Association for Computational Linguistics, 2025.
+
+\bibitem{elyagoubi2026agentleak}
+F.~El~Yagoubi, G.~Badu-Marfo, and R.~Al~Mallah, ``Agentleak: A benchmark for internal-channel privacy leakage in multi-agent llm systems,'' 2026.
+
+\bibitem{gomaa2026converse}
+A.~Gomaa, A.~Salem, and S.~Abdelnabi, ``Converse: Benchmarking contextual safety in agent-to-agent conversations,'' in {\em Findings of the Association for Computational Linguistics: EACL 2026}, (Rabat, Morocco), pp.~3246--3268, Association for Computational Linguistics, 2026.
+
+\bibitem{zhang2026privacypeek}
+M.~Zhang, J.~Han, D.~Guo, S.~Li, G.~Wang, N.~Zou, D.~Liu, and X.~Hu, ``Privacypeek: Auditing what llm-based agents acquire, not just what they say,'' 2026.
+
 \bibitem{yao2024survey}
 Y.~Yao, J.~Duan, K.~Xu, Y.~Cai, Z.~Sun, and Y.~Zhang, ``A survey on large language model (llm) security and privacy: The good, the bad, and the ugly,'' {\em High-Confidence Computing}, vol.~4, no.~2, p.~100211, 2024.
 

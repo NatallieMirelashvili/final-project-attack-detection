@@ -163,17 +163,17 @@ External leakage was lower than internal leakage, but it was still observed in e
 
 Performance degradation was weaker than leakage. Non-zero utility drop appeared only in official AutoGen and official CrewAI, and even there the overall utility drop was 0.042. The family-level analysis showed that degradation effectiveness depends strongly on the attack mechanism. In particular, \texttt{priority\_conflict} was the most effective family for reducing task success in official runtimes, while \texttt{verification\_loop} produced the strongest operational degradation signal on LangGraph.
 
-\subsection{Summary of Findings}
-\label{subsec:results_summary}
+% \subsection{Summary of Findings}
+% \label{subsec:results_summary}
 
-The small-scale live Ollama evaluation leads to five preliminary findings.
+% The small-scale live Ollama evaluation leads to five preliminary findings.
 
-First, leakage attacks were consistently effective across the evaluated systems. Internal leakage rates were high across all four systems, suggesting that sensitive information can propagate through intermediate stages of multi-agent workflows.
+% First, leakage attacks were consistently effective across the evaluated systems. Internal leakage rates were high across all four systems, suggesting that sensitive information can propagate through intermediate stages of multi-agent workflows.
 
-Second, internal leakage and final-output leakage differed substantially. AgentDojo had high internal leakage but much lower final-output leakage, suggesting stronger filtering at the final response stage.
+% Second, internal leakage and final-output leakage differed substantially. AgentDojo had high internal leakage but much lower final-output leakage, suggesting stronger filtering at the final response stage.
 
-Third, external leakage reached the final output in every evaluated system. LangGraph showed the highest external leakage ASR, with a value of 0.375.
+% Third, external leakage reached the final output in every evaluated system. LangGraph showed the highest external leakage ASR, with a value of 0.375.
 
-Fourth, degradation attacks were weaker than leakage attacks. LangGraph and AgentDojo showed no task-success degradation in the small-scale degradation setting, while AutoGen official and CrewAI official showed a small non-zero utility drop of 0.042.
+% Fourth, degradation attacks were weaker than leakage attacks. LangGraph and AgentDojo showed no task-success degradation in the small-scale degradation setting, while AutoGen official and CrewAI official showed a small non-zero utility drop of 0.042.
 
-Fifth, degradation effectiveness depended on the attack family. \texttt{priority\_conflict} produced the clearest utility-drop signal on official AutoGen and official CrewAI, while \texttt{verification\_loop} produced the strongest operational signal on LangGraph.
+% Fifth, degradation effectiveness depended on the attack family. \texttt{priority\_conflict} produced the clearest utility-drop signal on official AutoGen and official CrewAI, while \texttt{verification\_loop} produced the strongest operational signal on LangGraph.

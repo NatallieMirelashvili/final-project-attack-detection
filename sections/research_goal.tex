@@ -6,7 +6,13 @@ However, modern agentic and multi-agent systems rely on complex internal communi
 As a result, sensitive information may propagate through the system even when no leakage is observable in the final output. 
 This raises concerns that existing evaluation methodologies may underestimate attack impact and real exposure when they inspect only the final user-visible output. 
 Furthermore, manually designing attacks for such systems is labor-intensive and may fail to uncover subtle attack strategies. 
-These challenges motivate the need for automated attack evaluation methodologies that explicitly account for internal system behavior.
+Although prior work has investigated adaptive attacks on inter-agent messages
+and has benchmarked leakage in internal traces, these directions have not
+been integrated into an AutoResearch-style loop that uses execution feedback
+to search a structured attack space. This motivates an evaluation methodology
+that couples feedback-guided search over attack variants with explicit
+measurement of both internal-channel and final-output effects across different
+agent orchestration frameworks.
 
 \paragraph{Research Questions:}
 \begin{itemize}[leftmargin=2cm]

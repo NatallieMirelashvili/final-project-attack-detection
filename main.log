@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.10.8)  10 AUG 2026 15:15
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.10.8)  10 AUG 2026 18:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -680,16 +680,12 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 14.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 
-LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <24> not available
-(Font)              size <24.88> substituted on input line 23.
+LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <22> not available
+(Font)              size <20.74> substituted on input line 23.
 
 
-LaTeX Font Warning: Font shape `T1/cmr/bx/n' in size <24> not available
-(Font)              size <24.88> substituted on input line 23.
-
-
-LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <15> not available
-(Font)              size <14.4> substituted on input line 27.
+LaTeX Font Warning: Font shape `T1/cmr/bx/n' in size <22> not available
+(Font)              size <20.74> substituted on input line 23.
 
 
 
@@ -708,35 +704,37 @@ l.13 \clearpage
 
 ]
 
-[3]) (./sections/related_work.tex
+[3]
+Overfull \hbox (1.45718pt too wide) in paragraph at lines 112--117
+\T1/cmr/m/n/12 output leak-age from leak-age in tool ar-gu-ments, inter-agent mes-sages, mem-ory writes,
+ []
+
+) (./sections/related_work.tex
 
 [4{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
 
-[5]) (./sections/research_goal.tex
-Overfull \hbox (8.24155pt too wide) in paragraph at lines 98--2
-[]\T1/cmr/m/n/12 Taken to-gether, prior work es-tab-lishes ad-ver-sar-ial in-put ma-nip-u-la-tion, in-clud-ing prompt
- []
+[5]
 
+[6]) (./sections/research_goal.tex
 
-
-[6]) (./sections/methodology.tex
-
-[7]
+[7]) (./sections/methodology.tex
 
 [8]
 
 [9]
 
 [10]
-<pictures/figure1.png, id=305, 1701.35625pt x 755.82375pt>
+
+[11]
+<pictures/figure1.png, id=317, 1701.35625pt x 755.82375pt>
 File: pictures/figure1.png Graphic file (type png)
 <use pictures/figure1.png>
 Package pdftex.def Info: pictures/figure1.png  used on input line 179.
 (pdftex.def)             Requested size: 452.9679pt x 201.2265pt.
 
 
-[11 <./pictures/figure1.png>]
-<pictures/figure 2.png, id=312, 1492.57625pt x 823.075pt>
+[12 <./pictures/figure1.png>]
+<pictures/figure 2.png, id=326, 1492.57625pt x 823.075pt>
 File: pictures/figure 2.png Graphic file (type png)
 <use pictures/figure 2.png>
 Package pdftex.def Info: pictures/figure 2.png  used on input line 215.
@@ -748,13 +746,13 @@ Overfull \hbox (37.76181pt too wide) in paragraph at lines 222--226
 
 
 
-[12 <./pictures/figure 2.png>]
-
-[13]
+[13 <./pictures/figure 2.png>]
 
 [14]
 
 [15]
+
+[16]
 Underfull \hbox (badness 1701) in paragraph at lines 407--407
 []\T1/cmr/m/n/10.95 Attack Gen-
  []
@@ -806,9 +804,7 @@ Overfull \hbox (2.72356pt too wide) in paragraph at lines 427--427
 
 
 
-[16]) (./sections/results.tex
-
-[17]
+[17]) (./sections/results.tex
 
 [18]
 
@@ -839,24 +835,24 @@ L3 programming layer <2025-01-18>
 
 
 LaTeX Font Warning: Size substitutions with differences
-(Font)              up to 0.88pt have occurred.
+(Font)              up to 1.26pt have occurred.
 
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 44CBFDBEAFD8A120638632E06B760162;7182.
+(rerunfilecheck)             Checksum: E287D00BEA82E9E5686179A31880B6B6;7313.
  ) 
 Here is how much of TeX's memory you used:
- 25360 strings out of 473190
- 469145 string characters out of 5715800
- 860023 words of memory out of 5000000
- 48061 multiletter control sequences out of 15000+600000
- 582862 words of font info for 102 fonts, out of 8000000 for 9000
+ 25374 strings out of 473190
+ 469536 string characters out of 5715800
+ 860037 words of memory out of 5000000
+ 48071 multiletter control sequences out of 15000+600000
+ 582866 words of font info for 102 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  89i,12n,94p,1735b,675s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfcc1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on main.pdf (27 pages, 2049648 bytes).
+</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx2074.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfcc1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
+Output written on main.pdf (27 pages, 2054867 bytes).
 PDF statistics:
- 514 PDF objects out of 1000 (max. 8388607)
- 437 compressed objects within 5 object streams
- 100 named destinations out of 1000 (max. 500000)
+ 523 PDF objects out of 1000 (max. 8388607)
+ 446 compressed objects within 5 object streams
+ 104 named destinations out of 1000 (max. 500000)
  380 words of extra memory for PDF output out of 10000 (max. 10000000)
 
