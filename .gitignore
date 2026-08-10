@@ -1,0 +1,18 @@
+# LaTeX paper artifacts (paper lives on the paper branch)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.xdv
+main.pdf
+papers/
+tmp/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
