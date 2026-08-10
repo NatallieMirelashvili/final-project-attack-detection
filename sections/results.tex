@@ -1,18 +1,18 @@
 \section{Results}
 \label{sec:results}
 
-This section presents the empirical results of the live LLM evaluation. The evaluation was conducted using the local model \texttt{llama3.2:3b} through Ollama, across four agentic systems: LangGraph, AgentDojo, official AutoGen, and official CrewAI. For each system, we evaluated three adversarial objectives: information leakage, external leakage into the final user-visible output, and performance degradation.
+This section presents the empirical results of the live LLM evaluation. The evaluation was conducted using the local model \texttt{llama3.2:3b} through Ollama, across four agentic systems: LangGraph, AgentDojo, AutoGen, and CrewAI. For each system, we evaluated three adversarial objectives: information leakage, external leakage into the final user-visible output, and performance degradation.
 
 The main evaluation is based on a small-scale exploratory suite. Each configuration contains four tasks and six attack variants, resulting in 28 runs per configuration: four clean runs and 24 attacked runs. Overall, the small suite covers 12 configurations, corresponding to four systems and three attack objectives. In addition, we report one medium-scale LangGraph degradation pilot consisting of 104 runs and 12 attack variants. Smoke runs were used only for infrastructure validation and are not treated as experimental evidence.
 
 \subsection{Information Leakage}
 \label{subsec:results_leakage}
 
-Table~\ref{tab:leakage_results} reports the results for the information leakage objective. Leakage attacks were highly effective across all evaluated systems. LangGraph, official AutoGen, and official CrewAI reached a leakage attack success rate (ASR) of 1.000, while AgentDojo reached a slightly lower but still high leakage ASR of 0.958. Clean task success was 1.000 for every system, so these results are not confounded by baseline task failures.
+Table~\ref{tab:leakage_results} reports the results for the information leakage objective. Leakage attacks were highly effective across all evaluated systems. LangGraph, AutoGen, and CrewAI reached a leakage attack success rate (ASR) of 1.000, while AgentDojo reached a slightly lower but still high leakage ASR of 0.958. Clean task success was 1.000 for every system, so these results are not confounded by baseline task failures.
 
-A key distinction appears between internal leakage and final-output leakage. Internal leakage counts any attacked run in which the canary appeared in an internal channel, regardless of whether it also reached the final output. In every system, internal leakage exactly matched the overall leakage ASR, so every attacked run that leaked at all included an internal-channel leak, and no run leaked only to the final output. The rate at which leakage additionally reached the final user-visible output varied substantially: AutoGen official showed the highest final-output leakage rate, with 0.458, followed by LangGraph with 0.375, CrewAI official with 0.292, and AgentDojo with the lowest, at 0.083. The resulting output-only miss rate, the share of attacked runs that leaked internally but never reached the final output, was highest for AgentDojo at 0.875 and lowest for AutoGen official at 0.542. Where Table~\ref{tab:leakage_results} reports attacked task success below 1.000, those changes are side effects under the leakage objective and are not degradation results.
+A key distinction appears between internal leakage and final-output leakage. Internal leakage counts any attacked run in which the canary appeared in an internal channel, regardless of whether it also reached the final output. In every system, internal leakage exactly matched the overall leakage ASR, so every attacked run that leaked at all included an internal-channel leak, and no run leaked only to the final output. The rate at which leakage additionally reached the final user-visible output varied substantially: AutoGen showed the highest final-output leakage rate, with 0.458, followed by LangGraph with 0.375, CrewAI with 0.292, and AgentDojo with the lowest, at 0.083. The resulting output-only miss rate, the share of attacked runs that leaked internally but never reached the final output, was highest for AgentDojo at 0.875 and lowest for AutoGen at 0.542. Where Table~\ref{tab:leakage_results} reports attacked task success below 1.000, those changes are side effects under the leakage objective and are not degradation results.
 
-This suggests that inspecting only the final answer may underestimate leakage risk. Sensitive information may propagate through intermediate agents, messages, memory, or tool outputs even when it is partially filtered before the final response.
+This suggests that inspecting only the final answer may underestimate leakage risk. The synthetic canary may propagate through intermediate agents, messages, memory, or tool outputs even when it is partially filtered before the final response.
 
 \begin{table*}[t]
 \centering
@@ -30,8 +30,8 @@ This suggests that inspecting only the final answer may underestimate leakage ri
 \hline
 LangGraph & 1.000 & 1.000 & 0.375 & 0.625 & 1.000 \\
 AgentDojo & 0.958 & 0.958 & 0.083 & 0.875 & 1.000 \\
-AutoGen official & 1.000 & 1.000 & 0.458 & 0.542 & 0.958 \\
-CrewAI official & 1.000 & 1.000 & 0.292 & 0.708 & 0.917 \\
+AutoGen & 1.000 & 1.000 & 0.458 & 0.542 & 0.958 \\
+CrewAI & 1.000 & 1.000 & 0.292 & 0.708 & 0.917 \\
 \hline
 \end{tabular}
 \end{table*}
@@ -42,11 +42,11 @@ CrewAI official & 1.000 & 1.000 & 0.292 & 0.708 & 0.917 \\
 
 Table~\ref{tab:external_leakage_results} presents the results for the external leakage objective, which measures whether sensitive information reaches the final user-visible output. Within the external-leakage objective, external leakage ASR was lower than internal leakage in every system, but it was still observed in every evaluated system.
 
-LangGraph was the most vulnerable system under this objective, with an external leakage ASR of 0.375. CrewAI official followed with 0.292, AutoGen official with 0.208, and AgentDojo with 0.167. External leakage ASR is defined as the fraction of attacked runs in which the canary reaches the final user-visible output, so it is identical by construction to a final-output leakage rate.
+LangGraph was the most vulnerable system under this objective, with an external leakage ASR of 0.375. CrewAI followed with 0.292, AutoGen with 0.208, and AgentDojo with 0.167. External leakage ASR is defined as the fraction of attacked runs in which the canary reaches the final user-visible output, so it is identical by construction to a final-output leakage rate.
 
-Table~\ref{tab:external_leakage_results} also reports internal leakage, which remained higher than external leakage under this objective, ranging from 0.667 on LangGraph to 1.000 on AutoGen official, even though the search here is weighted to prioritize final-output exposure. This suggests that internal channels may be an easier target for the search than the final output specifically. Each configuration was evaluated with only six attack variants. A larger search budget could plausibly narrow or reverse this gap.
+Table~\ref{tab:external_leakage_results} also reports internal leakage, which remained higher than external leakage under this objective, ranging from 0.667 on LangGraph to 1.000 on AutoGen, even though the search here is weighted to prioritize final-output exposure. This suggests that internal channels may be an easier target for the search than the final output specifically. Each configuration was evaluated with only six attack variants. Given the limited six-variant search budget, the observed gap should be interpreted as preliminary.
 
-Clean task success was 1.000 for three systems but only 0.750 for CrewAI official, so its attacked success rate of 0.458 partly reflects that lower baseline. These task-success changes are side effects of the \texttt{external\_leakage} goal, not degradation utility drop, since these configurations targeted exposure rather than performance degradation.
+Clean task success was 1.000 for three systems but only 0.750 for CrewAI, so its attacked success rate of 0.458 partly reflects that lower baseline. These task-success changes are side effects of the \texttt{external\_leakage} goal, not degradation utility drop, since these configurations targeted exposure rather than performance degradation.
 
 \begin{table*}[t]
 \centering
@@ -63,8 +63,8 @@ Clean task success was 1.000 for three systems but only 0.750 for CrewAI officia
 \hline
 LangGraph & 0.375 & 0.667 & 1.000 & 0.792 \\
 AgentDojo & 0.167 & 0.958 & 1.000 & 1.000 \\
-AutoGen official & 0.208 & 1.000 & 1.000 & 0.750 \\
-CrewAI official & 0.292 & 0.917 & 0.750 & 0.458 \\
+AutoGen & 0.208 & 1.000 & 1.000 & 0.750 \\
+CrewAI & 0.292 & 0.917 & 0.750 & 0.458 \\
 \hline
 \end{tabular}
 \end{table*}
@@ -72,108 +72,82 @@ CrewAI official & 0.292 & 0.917 & 0.750 & 0.458 \\
 \subsection{Performance Degradation}
 \label{subsec:results_degradation}
 
-Table~\ref{tab:degradation_results} reports the degradation results. Compared with leakage, degradation attacks produced weaker effects. LangGraph and AgentDojo showed no task-success degradation in the small-scale evaluation, with utility drop equal to 0.000. AutoGen official and CrewAI official showed a small but non-zero degradation signal, each with utility drop equal to 0.042.
+We evaluated performance degradation in two complementary settings. First, a
+small-scale diagnostic sweep tested six manually specified degradation families
+across all four systems. Second, a separate LangGraph pilot evaluated whether
+the AutoResearch search procedure could identify degradation-inducing attack
+variants under a larger search budget.
 
-These results suggest that, in this setting, the evaluated systems were more vulnerable to leakage than to direct performance degradation. In particular, adversarial content was often able to propagate through the workflow, but it did not always reduce task completion success.
+Table~\ref{tab:degradation_results} summarizes the diagnostic family-sweep
+results. The manually specified degradation mechanisms produced only limited
+changes in aggregate task success. LangGraph and AgentDojo retained a clean and
+attacked success rate of 1.000, while AutoGen and CrewAI showed a small aggregate
+utility drop of 0.042. Operational degradation was also small, but nonzero for
+LangGraph, AutoGen, and CrewAI. These results indicate that degradation can
+manifest either as reduced task success or as additional operational burden,
+and the two effects should therefore be interpreted separately.
 
 \begin{table*}[t]
 \centering
 \scriptsize
-\caption{Performance degradation results in the small-scale live Ollama evaluation.}
+\caption{Small-scale diagnostic degradation-family sweep. Six manually specified
+degradation families were evaluated across four tasks per system.}
 \label{tab:degradation_results}
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \hline
 \textbf{System} &
+\textbf{Attack Generation} &
 \textbf{Clean SR} &
 \textbf{Attacked SR} &
 \textbf{Utility Drop} &
-\textbf{Operational Degradation} \\
+\textbf{\shortstack{Operational\\Degradation}} \\
 \hline
-LangGraph & 1.000 & 1.000 & 0.000 & 0.019 \\
-AgentDojo & 1.000 & 1.000 & 0.000 & 0.000 \\
-AutoGen official & 1.000 & 0.958 & 0.042 & 0.021 \\
-CrewAI official & 1.000 & 0.958 & 0.042 & 0.010 \\
-\hline
-\end{tabular}
-\end{table*}
-
-\subsection{Degradation Family Analysis}
-\label{subsec:results_degradation_families}
-
-To better understand the weaker degradation signal, we analyzed six degradation families: \texttt{verification\_loop}, \texttt{caution\_abstention}, \texttt{tool\_overuse}, \texttt{priority\_conflict}, \texttt{format\_disruption}, and \texttt{memory\_context\_poisoning}.
-
-Table~\ref{tab:degradation_family_results} summarizes the strongest degradation families per system. The clearest task-success degradation signal came from \texttt{priority\_conflict}. This family produced a per-family utility drop of 0.250 on both official AutoGen and official CrewAI. This suggests that attacks that create conflicting priorities inside the agent workflow are more effective than generic degradation prompts for reducing task success.
-
-The strongest operational signal came from \texttt{verification\_loop} on LangGraph, where it produced an operational degradation score of 0.139. This did not reduce task success, but it increased operational burden. Therefore, operational degradation and task-success degradation should be interpreted separately.
-
-\begin{table*}[t]
-\centering
-\scriptsize
-\caption{Strongest degradation-family signals in the small-scale live Ollama evaluation. ``No utility signal'' indicates that all families had utility drop equal to 0.000 for that system.}
-\label{tab:degradation_family_results}
-\begin{tabular}{lcccc}
-\hline
-\textbf{System} &
-\textbf{\shortstack{Strongest Utility\\Family}} &
-\textbf{\shortstack{Family Utility\\Drop}} &
-\textbf{\shortstack{Strongest Operational\\Family}} &
-\textbf{\shortstack{Family Operational\\Score}} \\
-\hline
-LangGraph & No utility signal & 0.000 & \texttt{verification\_loop} & 0.139 \\
-AgentDojo & No utility signal & 0.000 & No operational signal & 0.000 \\
-AutoGen official & \texttt{priority\_conflict} & 0.250 & \texttt{priority\_conflict} & 0.089 \\
-CrewAI official & \texttt{priority\_conflict} & 0.250 & \texttt{priority\_conflict} & 0.062 \\
+LangGraph & Fixed family sweep & 1.000 & 1.000 & 0.000 & 0.019 \\
+AgentDojo & Fixed family sweep & 1.000 & 1.000 & 0.000 & 0.000 \\
+AutoGen & Fixed family sweep & 1.000 & 0.958 & 0.042 & 0.021 \\
+CrewAI & Fixed family sweep & 1.000 & 0.958 & 0.042 & 0.010 \\
 \hline
 \end{tabular}
 \end{table*}
 
-\subsection{Medium-Scale Degradation Pilot}
-\label{subsec:results_medium_pilot}
+The diagnostic sweep further showed that degradation effectiveness depends on
+the attack mechanism rather than appearing uniformly across attack variants.
+Some manually specified mechanisms affected task success, while others primarily
+increased operational burden or produced no measurable effect. This family-level
+analysis therefore serves as a diagnostic indication that degradation-inducing
+behaviors exist in the tested setting, rather than as an evaluation of the
+AutoResearch search procedure itself.
 
-In addition to the small-scale suite, we conducted a medium-scale LangGraph degradation pilot. This run included 104 runs and 12 attack variants. The result remained stable, with clean task success equal to 1.000, attacked task success equal to 1.000, and utility drop equal to 0.000.
-
-This result suggests that the generic degradation setting did not scale into a stronger degradation effect for LangGraph in this configuration. However, this medium pilot used a generic \texttt{auto\_research} degradation setup, whereas the small-scale degradation analysis used targeted degradation families. Therefore, the medium pilot should be interpreted as a preliminary indication only and not as a direct comparison against the family-based degradation results.
+To evaluate the automated search directly, we additionally conducted a larger
+LangGraph degradation pilot using AutoResearch. This experiment used eight tasks,
+12 generated attack variants, and 104 runs in total. As shown in
+Table~\ref{tab:medium_degradation_pilot}, clean and attacked task success both
+remained at 1.000, yielding a utility drop of 0.000.
 
 \begin{table*}[t]
 \centering
 \scriptsize
-\caption{LangGraph medium-scale degradation pilot.}
+\caption{LangGraph degradation pilot using AutoResearch search. The experiment
+used 12 generated attack variants across eight tasks, for 104 total runs.}
 \label{tab:medium_degradation_pilot}
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccc}
 \hline
 \textbf{System} &
-\textbf{Goal} &
-\textbf{Scale} &
-\textbf{Runs / Variants} &
+\textbf{Attack Generation} &
+\textbf{\shortstack{Runs /\\Variants}} &
 \textbf{Clean SR} &
 \textbf{Attacked SR} &
 \textbf{Utility Drop} \\
 \hline
-LangGraph & Degradation & Medium & 104 / 12 & 1.000 & 1.000 & 0.000 \\
+LangGraph & AutoResearch search & 104 / 12 & 1.000 & 1.000 & 0.000 \\
 \hline
 \end{tabular}
 \end{table*}
 
-\subsection{Cross-System Comparison}
-\label{subsec:results_cross_system}
+Thus, the reported automated degradation search did not identify an attack that
+reduced task success. The separate diagnostic sweep indicates that manually
+specified degradation mechanisms can affect the tested systems, but the
+AutoResearch search did not reproduce that behavior in the reported pilot.
+Overall, degradation effects were weaker and less consistent than leakage effects
+in this evaluation.
 
-Overall, leakage was the strongest and most consistent adversarial objective. In this exploratory suite, all four systems showed high leakage ASR, ranging from 0.958 to 1.000. This indicates that adversarially introduced sensitive information can propagate through live LLM-based agent workflows across the orchestration architectures studied here.
-
-External leakage was lower than internal leakage, but it was still observed in every system. LangGraph showed the highest external leakage ASR, while AgentDojo showed the lowest final-output leakage in the general leakage setting. This suggests that system architecture and finalization behavior influence whether internal leakage becomes visible to the user.
-
-Performance degradation was weaker than leakage. Non-zero utility drop appeared only in official AutoGen and official CrewAI, and even there the overall utility drop was 0.042. The family-level analysis showed that degradation effectiveness depends strongly on the attack mechanism. In particular, \texttt{priority\_conflict} was the most effective family for reducing task success in official runtimes, while \texttt{verification\_loop} produced the strongest operational degradation signal on LangGraph.
-
-% \subsection{Summary of Findings}
-% \label{subsec:results_summary}
-
-% The small-scale live Ollama evaluation leads to five preliminary findings.
-
-% First, leakage attacks were consistently effective across the evaluated systems. Internal leakage rates were high across all four systems, suggesting that sensitive information can propagate through intermediate stages of multi-agent workflows.
-
-% Second, internal leakage and final-output leakage differed substantially. AgentDojo had high internal leakage but much lower final-output leakage, suggesting stronger filtering at the final response stage.
-
-% Third, external leakage reached the final output in every evaluated system. LangGraph showed the highest external leakage ASR, with a value of 0.375.
-
-% Fourth, degradation attacks were weaker than leakage attacks. LangGraph and AgentDojo showed no task-success degradation in the small-scale degradation setting, while AutoGen official and CrewAI official showed a small non-zero utility drop of 0.042.
-
-% Fifth, degradation effectiveness depended on the attack family. \texttt{priority\_conflict} produced the clearest utility-drop signal on official AutoGen and official CrewAI, while \texttt{verification\_loop} produced the strongest operational signal on LangGraph.

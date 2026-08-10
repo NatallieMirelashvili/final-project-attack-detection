@@ -47,8 +47,7 @@ system behavior.
 
 \subsubsection{Sensitive Information Leakage}
 
-The leakage attacker attempts to cause a synthetic canary secret to appear
-outside its intended protection boundary. Leakage may occur in the final
+The leakage attacker attempts to cause a synthetic canary secret to propagate beyond its intended source or designated context. Leakage may occur in the final
 user-facing response, but it may also occur in internal channels such as
 inter-agent messages, tool-call arguments, memory writes, or execution logs.
 This distinction is central to the evaluation: an attack may be security
@@ -100,31 +99,21 @@ experimental traces.
 \section{Experimental Systems}
 
 We evaluate the red-teaming framework on four agentic system settings that
-cover both single-agent tool use and multi-agent coordination. Each setting is
-exposed through a common adapter interface that executes clean and attacked
-runs, records final outputs, and stores channel-separated traces. This common
-interface allows the same attack variants and metrics to be applied across
-systems while preserving the communication pattern that distinguishes each
-framework.
-
-The four settings are integrated in two different ways. LangGraph and
-AgentDojo are evaluated through dedicated adapters built for this project
-that reproduce each framework's communication pattern in a controlled local
-pipeline. AutoGen and CrewAI are evaluated by driving each framework's
-official runtime directly, through its own multi-agent orchestration
-classes.
+cover both single-agent tool use and multi-agent coordination. For each
+setting, the evaluation executes clean and attacked runs, records final
+outputs, and stores channel-separated traces. This allows the same attack
+variants and metrics to be applied across systems while preserving the
+communication pattern that distinguishes each framework.
 
 \subsection{AgentDojo}
 
 AgentDojo serves as the benchmark-oriented single-agent reference point. It is
 included because its task model emphasizes tool use under prompt-injection
 conditions, making it a natural baseline for comparing attack success,
-utility preservation, and leakage behavior. In our implementation, the
-AgentDojo setting is evaluated through an adapter that exposes the same run
-interface as the multi-agent systems and records task success, final output,
-tool-related trace content, and canary exposure. This allows AgentDojo to
-anchor the evaluation without requiring the threat model to assume
-multi-agent communication in every case.
+utility preservation, and leakage behavior. The evaluation records task
+success, final output, tool-related trace content, and canary exposure. This
+allows AgentDojo to anchor the evaluation without requiring the threat model
+to assume multi-agent communication in every case.
 
 \subsection{AutoGen}
 
@@ -134,9 +123,8 @@ that propagate through dialogue history, delegated requests, or intermediate
 agent responses before a final answer is produced. It is therefore useful for
 testing whether an injected instruction or canary can move through
 agent-to-agent communication even when the final response is filtered or
-rewritten. The corresponding official-runtime integration models the conversational structure and
-records the internal message trace needed to distinguish final-output leakage
-from internal exposure.
+rewritten. The evaluation records the internal message trace needed to
+distinguish final-output leakage from internal exposure.
 
 \subsection{CrewAI}
 
@@ -172,8 +160,7 @@ reviewer/guard stage checks the draft before release.
 The internal-channel layer denotes the communication surface observed during the experiments.
 Figure~\ref{fig:workflow} is a logical abstraction: not every evaluated system
 instantiates every stage identically, but the same logical stages are used across
-systems so that differences in attack behavior can be attributed to communication
-structure and trace propagation rather than to uncontrolled changes in the task itself.
+systems so that task variation is reduced as a confounding factor when comparing attack behavior across systems.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{pictures/figure1.png}
@@ -371,8 +358,7 @@ evaluated against the same fixed task set, so that differences in the
 results can be attributed to the system and the attack rather than to
 differences in the underlying tasks.
 
-Four systems are evaluated for $S$: LangGraph and AgentDojo through their
-real adapters, and AutoGen and CrewAI through their official runtimes.
+Four systems are evaluated for $S$: LangGraph, AgentDojo, AutoGen, and CrewAI.
 Three goals are evaluated for $G$: leakage, external leakage, and
 degradation. The \texttt{external\_leakage} goal is implemented as a
 leakage-loop variant with a reward profile that emphasizes final-output
@@ -402,30 +388,30 @@ Table~\ref{tab:exp_matrix} summarizes the configurations evaluated.
 \begingroup
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}llp{0.24\textwidth}p{0.14\textwidth}c@{}}
+\begin{tabular}{@{}lp{0.28\textwidth}p{0.2\textwidth}c@{}}
 \toprule
-System & Integration & Goal & Attack Generation & Runs \\
+System & Goal & Attack Generation & Runs \\
 \midrule
-\multirow{4}{*}{LangGraph} & \multirow{4}{*}{Real adapter}
+\multirow{4}{*}{LangGraph}
   & Leakage & AutoResearch & 28 \\
-  & & External leakage & AutoResearch & 28 \\
-  & & Degradation & Family sweep & 28 \\
-  & & Degradation (pilot) & AutoResearch & 104 \\
+  & External leakage & AutoResearch & 28 \\
+  & Degradation & Family sweep & 28 \\
+  & Degradation (pilot) & AutoResearch & 104 \\
 \midrule
-\multirow{3}{*}{AgentDojo} & \multirow{3}{*}{Real adapter}
+\multirow{3}{*}{AgentDojo}
   & Leakage & AutoResearch & 28 \\
-  & & External leakage & AutoResearch & 28 \\
-  & & Degradation & Family sweep & 28 \\
+  & External leakage & AutoResearch & 28 \\
+  & Degradation & Family sweep & 28 \\
 \midrule
-\multirow{3}{*}{AutoGen} & \multirow{3}{*}{Official runtime}
+\multirow{3}{*}{AutoGen}
   & Leakage & AutoResearch & 28 \\
-  & & External leakage & AutoResearch & 28 \\
-  & & Degradation & Family sweep & 28 \\
+  & External leakage & AutoResearch & 28 \\
+  & Degradation & Family sweep & 28 \\
 \midrule
-\multirow{3}{*}{CrewAI} & \multirow{3}{*}{Official runtime}
+\multirow{3}{*}{CrewAI}
   & Leakage & AutoResearch & 28 \\
-  & & External leakage & AutoResearch & 28 \\
-  & & Degradation & Family sweep & 28 \\
+  & External leakage & AutoResearch & 28 \\
+  & Degradation & Family sweep & 28 \\
 \bottomrule
 \end{tabular}
 \endgroup

@@ -27,10 +27,9 @@ exposed such a system really is, and may also miss attacks that degrade task
 performance or increase operational cost without leaking anything at all.
 
 This project combines internal-channel-aware evaluation with AutoResearch-style attack discovery by using internal traces as feedback signals to guide an automated search over attack variants. We ask (i) whether
-this iterative process can surface effective variants that exploit agentic and
-multi-agent workflows under a small search budget, and (ii) whether
-final-output-only evaluation misses leakage and degradation revealed by the
-same process in internal channels. We adopt an AutoResearch-style loop,
+this iterative process can identify effective attack variants under a limited search budget, and (ii) whether
+final-output-only evaluation misses leakage and degradation effects in
+internal channels. We adopt an AutoResearch-style loop,
 described below: a heuristic search procedure
 generates an attack variant, the variant is run against a target agentic
 system on a fixed task, the outcome is scored against a chosen metric, and
@@ -41,7 +40,7 @@ degradation. The framework can also amplify operational cost through extra
 tool calls and token usage; although latency can be recorded as a diagnostic
 signal, the reported evaluation focuses on task success, leakage, tool-call
 increase, and operational degradation score rather than latency. We study these
-goals across four systems: AgentDojo, AutoGen, CrewAI, and LangGraph, configured with a shared abstract pipeline so that results are comparable across frameworks. Throughout, the attacker only injects content into untrusted
+goals across four systems: AgentDojo, AutoGen, CrewAI, and LangGraph, configured with a shared abstract pipeline to support comparison across frameworks. Throughout, the attacker only injects content into untrusted
 channels (retrieved documents, tool outputs, task inputs, inter-agent
 messages), no real user data is involved and all sensitive information is
 represented by synthetic canary secrets in sandboxed tasks.
@@ -116,6 +115,5 @@ This project makes the following contributions:
     evaluation.
     \item We apply this methodology to four systems spanning single-agent
     (AgentDojo) and multi-agent (AutoGen, CrewAI, LangGraph) architectures,
-    configured with a shared abstract workflow so that leakage and
-    degradation behavior can be compared across frameworks.
+    configured with a shared abstract workflow to enable a common evaluation of leakage and degradation behavior across frameworks.
 \end{itemize}

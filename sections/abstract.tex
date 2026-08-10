@@ -10,12 +10,16 @@ agentic and multi-agent LLM systems. Attack variants are generated through a
 heuristic search procedure over a defined attack space, evaluated against a
 target system on a fixed task, and scored to guide the next iteration. We report
 a small-scale exploratory evaluation using \texttt{llama3.2:3b} through
-Ollama on four agentic systems, LangGraph, AgentDojo, official AutoGen, and
-official CrewAI, across three experimental objectives: information leakage,
+    Ollama on four agentic systems, LangGraph, AgentDojo, AutoGen, and
+    CrewAI, across three experimental objectives: information leakage,
 external leakage into the final output, and performance degradation. Leakage attack success rates
 ranged from 0.958 to 1.000 across all four systems, and internal-channel
 leakage was consistently higher than final-output leakage, indicating that
-final-output-only evaluation can underestimate real exposure. Degradation effects were weaker than leakage effects overall, though one degradation family targeting conflicting task priorities reduced task success by 25\% at the family level on two of the four systems.
+    final-output-only evaluation can underestimate measured exposure. Automated
+    degradation search did not produce a measurable task-success drop in the
+    reported experiment. A separate diagnostic evaluation indicated that
+    manually specified degradation mechanisms can affect task success, but the
+    automated search did not reproduce that behavior.
 
 
 \end{abstract}
