@@ -10,7 +10,7 @@ The main evaluation is based on a small-scale exploratory suite. Each configurat
 
 Table~\ref{tab:leakage_results} reports the results for the information leakage objective. Leakage attacks were highly effective across all evaluated systems. LangGraph, official AutoGen, and official CrewAI reached a leakage attack success rate (ASR) of 1.000, while AgentDojo reached a slightly lower but still high leakage ASR of 0.958. Clean task success was 1.000 for every system, so these results are not confounded by baseline task failures.
 
-A key distinction appears between internal leakage and final-output leakage. Internal leakage counts any attacked run in which the canary appeared in an internal channel, regardless of whether it also reached the final output. In every system, internal leakage exactly matched the overall leakage ASR, so every attacked run that leaked at all included an internal-channel leak, and no run leaked only to the final output. The rate at which leakage additionally reached the final user-visible output varied substantially: AutoGen official showed the highest final-output leakage rate, with 0.458, followed by LangGraph with 0.375, CrewAI official with 0.292, and AgentDojo with the lowest, at 0.083. The resulting output-only miss rate, the share of attacked runs that leaked internally but never reached the final output, was highest for AgentDojo at 0.875 and lowest for AutoGen official at 0.542.
+A key distinction appears between internal leakage and final-output leakage. Internal leakage counts any attacked run in which the canary appeared in an internal channel, regardless of whether it also reached the final output. In every system, internal leakage exactly matched the overall leakage ASR, so every attacked run that leaked at all included an internal-channel leak, and no run leaked only to the final output. The rate at which leakage additionally reached the final user-visible output varied substantially: AutoGen official showed the highest final-output leakage rate, with 0.458, followed by LangGraph with 0.375, CrewAI official with 0.292, and AgentDojo with the lowest, at 0.083. The resulting output-only miss rate, the share of attacked runs that leaked internally but never reached the final output, was highest for AgentDojo at 0.875 and lowest for AutoGen official at 0.542. Where Table~\ref{tab:leakage_results} reports attacked task success below 1.000, those changes are side effects under the leakage objective and are not degradation results.
 
 This suggests that inspecting only the final answer may underestimate leakage risk. Sensitive information may propagate through intermediate agents, messages, memory, or tool outputs even when it is partially filtered before the final response.
 
@@ -40,7 +40,7 @@ CrewAI official & 1.000 & 1.000 & 0.292 & 0.708 & 0.917 \\
 \subsection{External Leakage}
 \label{subsec:results_external_leakage}
 
-Table~\ref{tab:external_leakage_results} presents the results for the external leakage objective, which measures whether sensitive information reaches the final user-visible output. Compared with internal leakage, external leakage was lower across all systems, but it was still observed in every evaluated system.
+Table~\ref{tab:external_leakage_results} presents the results for the external leakage objective, which measures whether sensitive information reaches the final user-visible output. Within the external-leakage objective, external leakage ASR was lower than internal leakage in every system, but it was still observed in every evaluated system.
 
 LangGraph was the most vulnerable system under this objective, with an external leakage ASR of 0.375. CrewAI official followed with 0.292, AutoGen official with 0.208, and AgentDojo with 0.167. External leakage ASR is defined as the fraction of attacked runs in which the canary reaches the final user-visible output, so it is identical by construction to a final-output leakage rate.
 
@@ -157,7 +157,7 @@ LangGraph & Degradation & Medium & 104 / 12 & 1.000 & 1.000 & 0.000 \\
 \subsection{Cross-System Comparison}
 \label{subsec:results_cross_system}
 
-Overall, leakage was the strongest and most consistent adversarial objective. All four systems showed high leakage ASR, ranging from 0.958 to 1.000. This indicates that adversarially introduced sensitive information can propagate through live LLM-based agent workflows across different orchestration architectures.
+Overall, leakage was the strongest and most consistent adversarial objective. In this exploratory suite, all four systems showed high leakage ASR, ranging from 0.958 to 1.000. This indicates that adversarially introduced sensitive information can propagate through live LLM-based agent workflows across the orchestration architectures studied here.
 
 External leakage was lower than internal leakage, but it was still observed in every system. LangGraph showed the highest external leakage ASR, while AgentDojo showed the lowest final-output leakage in the general leakage setting. This suggests that system architecture and finalization behavior influence whether internal leakage becomes visible to the user.
 

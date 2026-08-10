@@ -134,7 +134,7 @@ that propagate through dialogue history, delegated requests, or intermediate
 agent responses before a final answer is produced. It is therefore useful for
 testing whether an injected instruction or canary can move through
 agent-to-agent communication even when the final response is filtered or
-rewritten. The corresponding adapter models the conversational structure and
+rewritten. The corresponding official-runtime integration models the conversational structure and
 records the internal message trace needed to distinguish final-output leakage
 from internal exposure.
 
@@ -170,10 +170,10 @@ which are treated as untrusted inputs under the threat model. The worker uses
 the accumulated context to produce the primary task output, while the
 reviewer/guard stage checks the draft before release. 
 The internal-channel layer denotes the communication surface observed during the experiments.
-The same logical stages are used across systems so
-that differences in attack behavior can be attributed to communication
-structure and trace propagation rather than to uncontrolled changes in the
-task itself.
+Figure~\ref{fig:workflow} is a logical abstraction: not every evaluated system
+instantiates every stage identically, but the same logical stages are used across
+systems so that differences in attack behavior can be attributed to communication
+structure and trace propagation rather than to uncontrolled changes in the task itself.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{pictures/figure1.png}
@@ -200,7 +200,8 @@ design.
 Each experiment is defined by a target system, a task set, an attack space,
 and a scoring function. An attack variant specifies the injected template, the
 injection location, the target channel or agent, and auxiliary parameters such
-as stealth level. The runner first executes clean baseline runs, then
+as stealth level; these fields are drawn from predefined pools rather than
+generated freely by the evaluated LLM. The runner first executes clean baseline runs, then
 iteratively evaluates attacked runs and records the resulting final outputs,
 task-success indicators, cost counters, and channel-separated traces. The
 same infrastructure can support random sampling and fixed manual baselines,
@@ -212,11 +213,16 @@ summarizes this optimization loop.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{pictures/figure 2.png}
-\caption{AutoResearch red-teaming loop.}
+\caption{AutoResearch red-teaming loop. The \texttt{external\_leakage} goal appears as a leakage-loop variant with a final-output-weighted reward profile.}
 \label{fig:autoresearch_loop}
 \end{figure}
 
 \subsection{Loop A: Leakage Optimization}
+
+The reported evaluation uses two conceptual loop types, leakage and
+degradation, but three experimental goals: leakage, \texttt{external\_leakage},
+and degradation. The \texttt{external\_leakage} goal is a leakage-loop variant
+scored with a reward profile that emphasizes final-output exposure.
 
 The first optimization loop searches for variants that increase exposure of a
 synthetic canary secret. The score is computed from leakage events observed in
@@ -368,7 +374,9 @@ differences in the underlying tasks.
 Four systems are evaluated for $S$: LangGraph and AgentDojo through their
 real adapters, and AutoGen and CrewAI through their official runtimes.
 Three goals are evaluated for $G$: leakage, external leakage, and
-degradation.
+degradation. The \texttt{external\_leakage} goal is implemented as a
+leakage-loop variant with a reward profile that emphasizes final-output
+exposure.
 
 The attack-generation method $A$ depends on the goal. For leakage and
 external leakage, and for the medium-scale degradation pilot, attacked runs

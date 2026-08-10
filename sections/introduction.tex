@@ -7,9 +7,10 @@ a sequence of actions toward a goal. In multi-agent systems, several such
 agents are composed into a single pipeline, for example, a planner that
 decomposes the task, a retriever or tool-using agent that gathers external
 information, a worker agent that carries out the core task, and a reviewer or
-guard agent that checks the result before it is returned to the user. 
-\\Although this decomposition improves modularity and often enhances task performance, 
-it also introduces internal communication channels, such as inter-agent messages, tool-call arguments, memory writes, and logs, 
+guard agent that checks the result before it is returned to the user.
+
+Although this decomposition improves modularity and often enhances task performance,
+it also introduces internal communication channels, such as inter-agent messages, tool-call arguments, memory writes, and logs,
 that are not directly visible to the end user.
 
 Existing evaluations of prompt-injection robustness for LLM-integrated systems
@@ -26,10 +27,11 @@ exposed such a system really is, and may also miss attacks that degrade task
 performance or increase operational cost without leaking anything at all.
 
 This project investigates that gap directly. We ask (i) whether an
-automated, iterative red-teaming process can discover effective attacks that
-exploit the internal channels of agentic and multi-agent systems, and (ii)
-whether final-output-only evaluation indeed misses leakage and degradation
-that an internal-channel-aware evaluation would catch. We adopt an
+automated, iterative red-teaming process can surface effective attack
+variants that exploit the internal channels of agentic and multi-agent
+systems under a small search budget, and (ii) whether final-output-only
+evaluation indeed misses leakage and degradation that an internal-channel-aware
+evaluation would catch. We adopt an
 AutoResearch-style loop, described below: a heuristic search procedure
 generates an attack variant, the variant is run against a target agentic
 system on a fixed task, the outcome is scored against a chosen metric, and
@@ -64,11 +66,12 @@ human input. CrewAI \cite{crewai} assigns each agent an explicit role, goal,
 and set of tools, and lets agents delegate subtasks to one another. LangGraph
 \cite{langgraph} represents the pipeline as an explicit graph of nodes and
 edges with shared, inspectable state, which makes it convenient to trace
-exactly where in the pipeline an attack takes effect. In all three frameworks,
-the additional roles: planner, retriever/tool agent, worker, reviewer/guard communicate through messages, shared memory, or delegation calls that never
-appear in the final response shown to the user, but that attacker-controlled
-input may still be able to influence or read from. The threat model introduced
-later in this paper targets exactly these channels.
+exactly where in the pipeline an attack takes effect. In these multi-agent
+frameworks, additional roles such as planner, retriever/tool agent, worker,
+and reviewer/guard communicate through messages, shared memory, or delegation
+calls that never appear in the final response shown to the user, but that
+attacker-controlled input may still be able to influence or read from. The
+threat model introduced later in this paper targets exactly these channels.
 
 \subsection{AutoResearch-Style Optimization}
 
@@ -82,11 +85,13 @@ underlying generate-evaluate-score-keep/discard cycle does not depend on what
 is being optimized.
 
 This project adapts that cycle to automated red teaming, replacing the
-LLM-agent edit step with a heuristic search procedure. The search explores a
-defined space of attack variants, covering the injected content, its
-placement within the pipeline, the targeted agent, and its phrasing, using
-mutation, crossover, and family-based selection to bias future variants
-toward higher-scoring regions of that space. This differs from recent
+LLM-agent edit step with a heuristic search procedure. The search selects,
+mutates, and recombines variants within a predefined attack space of structured
+fields and templates; it does not rely on an LLM to invent the attack space or
+families from scratch. The search explores that space, covering the injected
+content, its placement within the pipeline, the targeted agent, and its
+phrasing, using mutation, crossover, and family-based selection to bias future
+variants toward higher-scoring regions of that space. This differs from recent
 reinforcement-learning-based approaches to automated prompt injection, which
 optimize universal adversarial suffixes through gradient-based or
 policy-gradient training over model weights
