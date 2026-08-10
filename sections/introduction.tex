@@ -7,9 +7,10 @@ a sequence of actions toward a goal. In multi-agent systems, several such
 agents are composed into a single pipeline, for example, a planner that
 decomposes the task, a retriever or tool-using agent that gathers external
 information, a worker agent that carries out the core task, and a reviewer or
-guard agent that checks the result before it is returned to the user. 
-\\Although this decomposition improves modularity and often enhances task performance, 
-it also introduces internal communication channels, such as inter-agent messages, tool-call arguments, memory writes, and logs, 
+guard agent that checks the result before it is returned to the user.
+
+Although this decomposition improves modularity and often enhances task performance,
+it also introduces internal communication channels, such as inter-agent messages, tool-call arguments, memory writes, and logs,
 that are not directly visible to the end user.
 
 Existing evaluations of prompt-injection robustness for LLM-integrated systems
@@ -25,21 +26,23 @@ Evaluating only the final output can therefore substantially underestimate how
 exposed such a system really is, and may also miss attacks that degrade task
 performance or increase operational cost without leaking anything at all.
 
-This project investigates that gap directly. We ask (i) whether an automated,
-iterative red-teaming process can discover attacks that exploit the internal
-channels of agentic and multi-agent systems more effectively than random or
-manually designed attacks, and (ii) whether final-output-only evaluation
-indeed misses leakage and degradation that an internal-channel-aware
-evaluation would catch. Rather than hand-crafting every attack variant, we
-adopt an AutoResearch-style loop, described below: an LLM agent proposes an
-attack variant, the variant is run against a target agentic system on a fixed
-task, the outcome is scored against a chosen metric, and the variant is kept or
-discarded before the next is proposed. We instantiate this loop twice, for two
-complementary attacker goals: maximizing the rate at which a synthetic canary
-secret is exposed through any channel, final output or internal, and
-degrading task utility and/or amplifying operational cost (extra tool calls,
-latency, tokens) without necessarily leaking a secret. We study both loops
-across four systems -- AgentDojo, AutoGen, CrewAI, and LangGraph, configured
+This project investigates that gap directly. We ask (i) whether an
+automated, iterative red-teaming process can surface effective attack
+variants that exploit the internal channels of agentic and multi-agent
+systems under a small search budget, and (ii) whether final-output-only
+evaluation indeed misses leakage and degradation that an internal-channel-aware
+evaluation would catch. We adopt an
+AutoResearch-style loop, described below: a heuristic search procedure
+generates an attack variant, the variant is run against a target agentic
+system on a fixed task, the outcome is scored against a chosen metric, and
+the variant is kept or discarded before the next is generated. In the reported
+evaluation, we operationalize these risks through three experimental goals:
+general channel-aware leakage, external final-output leakage, and performance
+degradation. The framework can also amplify operational cost through extra
+tool calls and token usage; although latency can be recorded as a diagnostic
+signal, the reported evaluation focuses on task success, leakage, tool-call
+increase, and operational degradation score rather than latency. We study these
+goals across four systems---AgentDojo, AutoGen, CrewAI, and LangGraph---configured
 with a shared abstract pipeline so that results are comparable across
 frameworks. Throughout, the attacker only injects content into untrusted
 channels (retrieved documents, tool outputs, task inputs, inter-agent
@@ -63,11 +66,12 @@ human input. CrewAI \cite{crewai} assigns each agent an explicit role, goal,
 and set of tools, and lets agents delegate subtasks to one another. LangGraph
 \cite{langgraph} represents the pipeline as an explicit graph of nodes and
 edges with shared, inspectable state, which makes it convenient to trace
-exactly where in the pipeline an attack takes effect. In all three frameworks,
-the additional roles: planner, retriever/tool agent, worker, reviewer/guard communicate through messages, shared memory, or delegation calls that never
-appear in the final response shown to the user, but that attacker-controlled
-input may still be able to influence or read from. The threat model introduced
-later in this paper targets exactly these channels.
+exactly where in the pipeline an attack takes effect. In these multi-agent
+frameworks, additional roles such as planner, retriever/tool agent, worker,
+and reviewer/guard communicate through messages, shared memory, or delegation
+calls that never appear in the final response shown to the user, but that
+attacker-controlled input may still be able to influence or read from. The
+threat model introduced later in this paper targets exactly these channels.
 
 \subsection{AutoResearch-Style Optimization}
 
@@ -80,41 +84,39 @@ automate iterative improvement of training and evaluation pipelines, but the
 underlying generate-evaluate-score-keep/discard cycle does not depend on what
 is being optimized.
 
-This project adapts that cycle to automated red teaming. Here, the LLM agent
-searches not for configurations that improve benign task performance, but for
-attack variants changes to the injected content, its placement within the
-pipeline, the targeted agent, and its phrasing. That increase a chosen
-attack-effectiveness metric against a fixed target system and task. This
-differs from recent reinforcement-learning-based approaches to automated
-prompt injection, which optimize universal adversarial suffixes through
-gradient-based or policy-gradient training over model weights
-\cite{learningtoinject2026,verifiableagenttoagent2026}. Because the
-AutoResearch loop operates on natural-language attack variants that are
-proposed and judged by an LLM agent rather than on model parameters, it
-requires no gradient access and can, in principle, be applied directly to
-closed, black-box agentic systems.
+This project adapts that cycle to automated red teaming, replacing the
+LLM-agent edit step with a heuristic search procedure. The search selects,
+mutates, and recombines variants within a predefined attack space of structured
+fields and templates; it does not rely on an LLM to invent the attack space or
+families from scratch. The search explores that space, covering the injected
+content, its placement within the pipeline, the targeted agent, and its
+phrasing, using mutation, crossover, and family-based selection to bias future
+variants toward higher-scoring regions of that space. This differs from recent
+reinforcement-learning-based approaches to automated prompt injection, which
+optimize universal adversarial suffixes through gradient-based or
+policy-gradient training over model weights
+\cite{learningtoinject2026,verifiableagenttoagent2026}. Because the search
+operates on discrete natural-language attack variants rather than on model
+parameters, it requires no gradient access and can, in principle, be applied
+directly to closed, black-box agentic systems.
 
 \subsection{Contributions}
 
 This project makes the following contributions:
 \begin{itemize}
     \item We instantiate an AutoResearch-style red-teaming loop for agentic
-    and multi-agent LLM systems, in which an LLM agent iteratively proposes,
-    evaluates, and selects attack variants against a fixed target system and
-    task.
-    \item We define two independent optimization objectives for this loop:
-    maximizing the total exposure rate of a synthetic canary secret across
-    final-output and internal channels, and maximizing a weighted combination
-    of task-utility drop and operational-cost amplification.
+    and multi-agent LLM systems, in which a heuristic search procedure
+    iteratively generates, evaluates, and selects attack variants against a
+    fixed target system and task.
+    \item We define three experimental attack goals: general information
+    leakage across monitored channels, external leakage into the final
+    user-visible output, and performance degradation.
     \item We define an evaluation methodology that separately measures
     final-output leakage and internal-channel leakage (in tool arguments,
     inter-agent messages, memory writes, and logs), enabling a direct test of
     whether output-only evaluation underestimates real exposure.
     \item We apply this methodology to four systems spanning single-agent
-    (AgentDojo) and multi-agent (AutoGen, CrewAI, LangGraph) architectures
-    configured with a shared abstract workflow, and study whether attacks
-    optimized on one framework transfer to the others.
-    \item We compare AutoResearch-optimized attacks against clean, random, and
-    manually designed baselines, under a range of prompt-based, guard-agent,
-    redaction, and tool-output-filtering defenses.
+    (AgentDojo) and multi-agent (AutoGen, CrewAI, LangGraph) architectures,
+    configured with a shared abstract workflow so that leakage and
+    degradation behavior can be compared across frameworks.
 \end{itemize}

@@ -21,7 +21,10 @@ normally consumed by the workflow, such as:
 \end{itemize}
 
 These channels model indirect prompt-injection and data-poisoning conditions
-rather than direct compromise of the system. The attacker may vary the wording
+rather than direct compromise of the system. Not every channel applies to
+every evaluated system. Inter-agent messages, for instance, are only
+relevant to the multi-agent settings, so the exact set of entry points
+exercised depends on the evaluated configuration. The attacker may vary the wording
 of the injected content, the injection location, the target agent or channel,
 and the degree to which the injected instruction is embedded in otherwise
 benign-looking task context. In the implemented experiments, these choices are
@@ -37,8 +40,9 @@ final outputs and internal traces.
 
 \subsection{Attack Goals}
 
-We consider two complementary attack goals that correspond to the main risks
-studied in this paper: disclosure of protected information and degradation of
+We consider three attack goals that correspond to the main risks studied in
+this paper: disclosure of protected information through any channel,
+disclosure specifically into the final user-facing output, and degradation of
 system behavior.
 
 \subsubsection{Sensitive Information Leakage}
@@ -50,7 +54,25 @@ inter-agent messages, tool-call arguments, memory writes, or execution logs.
 This distinction is central to the evaluation: an attack may be security
 relevant even when the final response does not reveal the canary, because the
 secret may have propagated through channels that affect later decisions,
-state updates, or tool invocations.
+state updates, or tool invocations. The search treats both channels as
+equally informative evidence of exposure: internal and final-output leakage
+receive equal weight in the variant score, alongside a channel-agnostic
+exposure term that rewards a successful leak regardless of which channel it
+reached.
+
+\subsubsection{External Leakage}
+
+The external leakage attacker pursues the same objective, exposing a canary
+secret, using the same attack space and search procedure as the leakage
+attacker above, but it is scored to weight final-output exposure roughly four
+times as heavily as internal exposure. Internal leakage still counts toward
+the score, so it is not excluded from the objective. This weighting isolates
+the harder, more conventional disclosure setting in which a defense that
+inspects only the final response would still fail to catch the attack.
+Because these runs are generated and executed under the \texttt{external\_leakage}
+goal, they can also produce a task-success change. We treat that change as a side effect of
+the external leakage objective, not as a degradation result, since these runs
+are optimized for exposure rather than for utility loss.
 
 \subsubsection{Performance Degradation}
 
@@ -81,9 +103,16 @@ We evaluate the red-teaming framework on four agentic system settings that
 cover both single-agent tool use and multi-agent coordination. Each setting is
 exposed through a common adapter interface that executes clean and attacked
 runs, records final outputs, and stores channel-separated traces. This common
-interface allows the same attack variants, defenses, and metrics to be applied
-across systems while preserving the communication pattern that distinguishes
-each framework.
+interface allows the same attack variants and metrics to be applied across
+systems while preserving the communication pattern that distinguishes each
+framework.
+
+The four settings are integrated in two different ways. LangGraph and
+AgentDojo are evaluated through dedicated adapters built for this project
+that reproduce each framework's communication pattern in a controlled local
+pipeline. AutoGen and CrewAI are evaluated by driving each framework's
+official runtime directly, through its own multi-agent orchestration
+classes.
 
 \subsection{AgentDojo}
 
@@ -105,7 +134,7 @@ that propagate through dialogue history, delegated requests, or intermediate
 agent responses before a final answer is produced. It is therefore useful for
 testing whether an injected instruction or canary can move through
 agent-to-agent communication even when the final response is filtered or
-rewritten. The corresponding adapter models the conversational structure and
+rewritten. The corresponding official-runtime integration models the conversational structure and
 records the internal message trace needed to distinguish final-output leakage
 from internal exposure.
 
@@ -133,18 +162,18 @@ output.
 
 \subsection{Unified Experimental Scenario}
 
-To enable comparison, each system setting is configured to implement the same
-abstract workflow, shown in Figure~\ref{fig:workflow}. 
+To enable comparison, each system setting is configured to approximate the
+same abstract workflow, shown in Figure~\ref{fig:workflow}.
 The planner interprets the user request and decomposes it into executable
 steps. The retriever/tool stage introduces external context or tool results,
 which are treated as untrusted inputs under the threat model. The worker uses
 the accumulated context to produce the primary task output, while the
 reviewer/guard stage checks the draft before release. 
 The internal-channel layer denotes the communication surface observed during the experiments.
-The same logical stages are used across systems so
-that differences in attack behavior can be attributed to communication
-structure and trace propagation rather than to uncontrolled changes in the
-task itself.
+Figure~\ref{fig:workflow} is a logical abstraction: not every evaluated system
+instantiates every stage identically, but the same logical stages are used across
+systems so that differences in attack behavior can be attributed to communication
+structure and trace propagation rather than to uncontrolled changes in the task itself.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{pictures/figure1.png}
@@ -171,22 +200,29 @@ design.
 Each experiment is defined by a target system, a task set, an attack space,
 and a scoring function. An attack variant specifies the injected template, the
 injection location, the target channel or agent, and auxiliary parameters such
-as stealth level. The runner first executes clean baseline runs, then
+as stealth level; these fields are drawn from predefined pools rather than
+generated freely by the evaluated LLM. The runner first executes clean baseline runs, then
 iteratively evaluates attacked runs and records the resulting final outputs,
 task-success indicators, cost counters, and channel-separated traces. The
-same loop supports random sampling, fixed manual baselines, and the
-AutoResearch search generator, enabling direct comparison between
-non-adaptive and reward-adaptive attack generation. Figure~\ref{fig:autoresearch_loop}
+same infrastructure can support random sampling and fixed manual baselines,
+enabling such comparisons in future expanded evaluations; the reported
+evaluation uses the AutoResearch search generator for leakage, external
+leakage, and the medium-scale degradation pilot. Figure~\ref{fig:autoresearch_loop}
 summarizes this optimization loop.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{pictures/figure 2.png}
-\caption{AutoResearch red-teaming loop.}
+\caption{AutoResearch red-teaming loop. The \texttt{external\_leakage} goal appears as a leakage-loop variant with a final-output-weighted reward profile.}
 \label{fig:autoresearch_loop}
 \end{figure}
 
 \subsection{Loop A: Leakage Optimization}
+
+The reported evaluation uses two conceptual loop types, leakage and
+degradation, but three experimental goals: leakage, \texttt{external\_leakage},
+and degradation. The \texttt{external\_leakage} goal is a leakage-loop variant
+scored with a reward profile that emphasizes final-output exposure.
 
 The first optimization loop searches for variants that increase exposure of a
 synthetic canary secret. The score is computed from leakage events observed in
@@ -218,8 +254,7 @@ The search generator uses the score assigned to previous variants to bias
 future candidates. Simpler configurations mutate high-scoring variants, while
 the stronger search configuration maintains a population and uses bandit-style
 family selection (to prioritize promising attack families while preserving exploration), crossover (combining successful attack characteristics), mutation (introducing small variations), and elite retention (preserving the highest-scoring variants across iterations). 
-Thus, improvement across iterations is driven by measured leakage behavior rather than by
-manually rewriting each attack.
+Candidate selection is therefore driven by measured leakage behavior.
 
 \subsection{Loop B: Performance Degradation Optimization}
 
@@ -231,16 +266,17 @@ resources, make additional tool calls, or spend more time completing the same
 task. The objective is:
 
 \begin{equation}
-\text{Objective}_{perf} = \max \left( \alpha \cdot \text{UtilityDrop} + \beta \cdot \text{CostAmplification} \right)
+\text{Objective}_{perf} = \max \left( \alpha \cdot \text{UtilityDrop} + \beta \cdot \text{CostAmplification} + \gamma \cdot \text{ToolCallIncrease} \right)
 \end{equation}
 
-where $\alpha$ and $\beta$ control the relative importance of correctness
-degradation and cost increase.
-
-The degradation score can additionally incorporate latency increase and tool
-call increase when these counters are available. This captures attacks that
-preserve an apparently coherent final answer but make the workflow less
-reliable or more expensive to execute. The loop may modify:
+where $\alpha$, $\beta$, and $\gamma$ control the relative importance of
+correctness degradation, cost increase, and tool-call increase. The
+implemented configuration weights these as $\alpha=1.0$, $\beta=0.3$, and
+$\gamma=0.2$, prioritizing utility drop above the other two terms. This
+scoring function is only applied when the degradation loop actually searches
+and scores variants, which in the reported results is the medium-scale
+LangGraph pilot. The small-scale degradation results come from a fixed
+family sweep that does not use this score at all. The loop may modify:
 
 \begin{itemize}
     \item Misleading documents.
@@ -262,11 +298,10 @@ experimental traces.
 % ============================================================
 \section{Evaluation Metrics}
 
-The evaluation measures attack impact along four dimensions: leakage,
-performance, transferability, and defense behavior. Table~\ref{tab:metrics_summary}
-summarizes the metrics used in each category. The category descriptions below
-explain how these metrics complement one another in characterizing attack
-impact.
+The evaluation measures attack impact along two dimensions: leakage and
+performance. Table~\ref{tab:metrics_summary} summarizes the metrics used in
+each category. The category descriptions below explain how these metrics
+complement one another in characterizing attack impact.
 
 \subsection{Leakage Metrics}
 
@@ -274,29 +309,22 @@ Leakage metrics are designed to distinguish observable disclosure from
 internal propagation. Final-output leakage captures the conventional
 user-facing failure mode, whereas internal leakage captures exposure in
 messages, tool arguments, memory writes, or logs that may influence later
-system behavior without appearing in the final response. Considering these
-channels jointly yields the total exposure of the workflow, while the
-output-only miss rate directly quantifies how much leakage would be hidden by
-an evaluation that inspects only the final answer.
+system behavior without appearing in the final response. The leakage ASR
+itself reflects exposure in either channel, while the output-only miss rate
+directly quantifies how much of that exposure would be hidden by an
+evaluation that inspects only the final answer.
 
 \subsection{Performance Metrics}
 
 Performance metrics measure the functional and operational cost of an attack.
 They complement the leakage metrics by capturing attacks whose primary effect
-is reduced correctness, increased resource consumption, or slower execution
-rather than secret exposure. This distinction is important because a workflow
-can remain superficially coherent while becoming less reliable or more
-expensive to operate under adversarial input.
+is reduced correctness, increased resource consumption, or additional tool
+calls rather than secret exposure. Although latency can be recorded by the
+framework, the reported evaluation focuses on task success, leakage,
+tool-call increase, and operational degradation score. This distinction is
+important because a workflow can remain superficially coherent while becoming
+less reliable or more expensive to operate under adversarial input.
 
-\subsection{Transferability Metrics}
-
-Transferability metrics measure whether attacks discovered on one system
-remain effective on other systems. They complement the within-system metrics
-by separating attacks that exploit framework-specific implementation details
-from attacks that generalize across agentic architectures. A small
-generalization gap indicates that the discovered variant captures a broader
-workflow weakness, whereas a large gap suggests dependence on the source
-system's communication or execution structure.
 \begin{table}[H]
 \centering
 \caption{Summary of evaluation metrics.}
@@ -304,131 +332,109 @@ system's communication or execution structure.
 \begingroup
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}p{0.18\textwidth}p{0.23\textwidth}p{0.51\textwidth}@{}}
+\begin{tabular}{@{}l|lp{0.48\textwidth}@{}}
 \toprule
 Category & Metric & Description \\
 \midrule
-Leakage & Leakage ASR & Fraction of attacked runs in which a canary is exposed in any monitored channel. \\
-Leakage & Final-Output Leakage Rate & Fraction of attacked runs in which a canary appears in the user-facing final output. \\
-Leakage & Internal Leakage Rate & Fraction of attacked runs in which a canary appears in internal channels. \\
-Leakage & Total Exposure Rate & Fraction of attacked runs with leakage in either final output or internal channels. \\
-Leakage & Output-Only Miss Rate & Fraction of attacked runs that would be missed by final-output-only evaluation. \\
+\multirow{4}{*}{Leakage}
+  & Leakage ASR & Fraction of attacked runs in which a canary is exposed in any monitored channel. \\
+  \cmidrule(lr){2-3}
+  & Final-Output Leakage Rate & Fraction of attacked runs in which a canary appears in the user-facing final output. \\
+  \cmidrule(lr){2-3}
+  & Internal Leakage Rate & Fraction of attacked runs in which a canary appears in internal channels. \\
+  \cmidrule(lr){2-3}
+  & Output-Only Miss Rate & Fraction of attacked runs that would be missed by final-output-only evaluation. \\
 \midrule
-Performance & Utility Drop & Reduction in task success under attack relative to clean execution. \\
-Performance & Cost Amplification & Ratio between attacked and clean operational cost. \\
-Performance & Latency Increase & Ratio between attacked and clean task latency. \\
-Performance & Tool Call Increase & Ratio between attacked and clean tool-call count. \\
-\midrule
-Transferability & Transfer ASR & Relative attack success when variants are evaluated on unseen systems. \\
-Transferability & Generalization Gap & Difference between attack success on seen and unseen systems. \\
-\midrule
-Defense & Leakage reduction & Reduction in leakage under a defense. \\
-Defense & Utility preservation & Degree to which benign task performance is retained under a defense. \\
-Defense & False refusal rate & Rate at which legitimate requests are incorrectly blocked. \\
-Defense & Over-defense rate & Rate of excessive defensive action on safe or non-sensitive content. \\
-Defense & Defense cost overhead & Additional resource consumption introduced by the defense. \\
-Defense & Attack success despite guard & Residual attack success while a guard or defense is active. \\
+\multirow{2}{*}{Performance}
+  & Utility Drop & Reduction in task success under attack relative to clean execution. \\
+  \cmidrule(lr){2-3}
+  & Operational Degradation Score & Weighted composite of tool-call increase, retry rate, loop or failure rate, and cost amplification, computed both per experiment and per attack family. \\
 \bottomrule
 \end{tabular}
 \endgroup
 \end{table}
-
-
-\subsection{Defense Metrics}
-
-Defense metrics evaluate both mitigation effectiveness and collateral cost.
-They complement attack-success metrics by asking not only whether a defense
-reduces leakage or degradation, but also whether it preserves benign task
-utility and avoids excessive blocking, redaction, latency, or cost. This
-trade-off is necessary because a defense that suppresses attacks by rejecting
-ordinary work may improve security metrics while degrading system usefulness.
 
 % ============================================================
 \section{Experimental Design}
 
-The experimental design compares attack-generation strategies, defense
-settings, and target systems under controlled task and configuration choices.
-Each run is specified by a configuration that fixes the target adapter, task
-set, attack goal, defense preset, attack generator, random seed, and search
-budget. The runner first executes clean runs for the selected tasks and then
-evaluates attacked runs produced by the selected generator. This design allows
-attack effectiveness to be compared against clean behavior and against
-non-adaptive baselines while keeping the system, task distribution, and
-defense setting fixed within each comparison.
+This section specifies how each experiment is configured and which
+configurations were evaluated in this study.
 
-\subsection{Baselines}
-
-We compare four attack settings: 
-\begin{itemize}
-    \item \textbf{B0: Clean}: no attack.
-    \item \textbf{B1: Random}: random or naive injection.
-    \item \textbf{B2: Manual}: manually designed attack.
-    \item \textbf{B3: AutoResearch}: automatically optimized attack.
-\end{itemize}
-The clean setting establishes the reference
-task success, cost, and latency for each system and task set. The random
-baseline measures the effect of unoptimized injection attempts, while the
-manual baseline captures fixed human-designed attacks. The AutoResearch
-setting uses the reward-guided search procedure described in Section~6 and is
-evaluated under the same tasks, defenses, and scoring metrics as the other
-attack settings.
-
-\subsection{Defense Settings}
-
-We evaluate the following defense configurations: 
-\begin{itemize}
-    \item \textbf{D0: No defense}.
-    \item \textbf{D1: Prompt-based defense}.
-    \item \textbf{D2: Guard agent}.
-    \item \textbf{D3: Memory or inter-agent redaction}.
-    \item \textbf{D4: Tool-output filtering}.
-\end{itemize}
-D0 provides the undefended
-reference point. The remaining settings represent increasingly explicit
-interventions in the prompt, review layer, internal communication channels,
-or tool-output boundary. These defenses are evaluated not only by whether
-they reduce leakage or degradation, but also by whether they preserve benign
-task utility and avoid excessive cost.
-
-\subsection{Experimental Matrix}
-
-Each experiment is defined by:
-
+Each experiment is defined by
 \begin{equation}
-E = (S, G, A, D, T)
+E = (S, G, A, T)
 \end{equation}
+where $S$ is the system, $G$ is the attack goal, $A$ is the
+attack-generation method, and $T$ is the task set. No defense is applied in
+any reported run. Within a given evaluation scale, every system and goal is
+evaluated against the same fixed task set, so that differences in the
+results can be attributed to the system and the attack rather than to
+differences in the underlying tasks.
 
-where $S$ is the system, $G$ is the attack goal, $A$ is the attack type, $D$
-is the defense setting, and $T$ is the task or domain. In the implementation,
-these fields are instantiated through experiment configurations that also
-record auxiliary parameters such as the adapter type, calibration profile,
-attack-generator version, number of tasks, number of search iterations,
-reward profile, and random seed. A typical experiment executes one clean run
-per task and, for each search iteration, evaluates one generated attack
-variant on the fixed task set. Transfer experiments reuse variants discovered
-on a source system and replay them on target systems without re-optimizing
-them. Table~\ref{tab:exp_matrix} summarizes the resulting experimental
-matrix.
+Four systems are evaluated for $S$: LangGraph and AgentDojo through their
+real adapters, and AutoGen and CrewAI through their official runtimes.
+Three goals are evaluated for $G$: leakage, external leakage, and
+degradation. The \texttt{external\_leakage} goal is implemented as a
+leakage-loop variant with a reward profile that emphasizes final-output
+exposure.
+
+The attack-generation method $A$ depends on the goal. For leakage and
+external leakage, and for the medium-scale degradation pilot, attacked runs
+use the AutoResearch search procedure described in Section~6. This
+procedure recombines four fields, injection location, target channel,
+target agent, and prompt template, drawn from fixed pools of 6, 8, 5, and 8
+values respectively, giving 1{,}920 combinations reachable through mutation
+and crossover. It is additionally seeded by 8 pre-authored attack families,
+each a fixed, complete combination with its own template text, for
+1{,}928 known attack configurations in total. Only 6 of these are evaluated
+per small-scale configuration, and 12 for the medium-scale pilot. For the
+small-scale degradation results, attacked runs instead execute six
+hand-authored degradation families once each: fixed, complete
+configurations rather than combinations drawn from a larger space. Every
+configuration also includes a clean baseline with no attack applied.
+
+Table~\ref{tab:exp_matrix} summarizes the configurations evaluated.
 
 \begin{table}[H]
 \centering
-\caption{Experimental matrix.}
+\caption{Configurations evaluated in this study. All use no defense.}
 \label{tab:exp_matrix}
 \begingroup
 \small
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}p{0.15\textwidth}p{0.22\textwidth}p{0.18\textwidth}p{0.28\textwidth}p{0.08\textwidth}@{}}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llp{0.24\textwidth}p{0.14\textwidth}c@{}}
 \toprule
-System & Architecture & Goal & Attack Type & Defense \\
+System & Integration & Goal & Attack Generation & Runs \\
 \midrule
-AgentDojo & Single-agent tool use & Leakage / Degradation & Clean / Random / Manual / AutoResearch & D0--D4 \\
-AutoGen & Conversational MAS & Leakage / Degradation & Clean / Random / Manual / AutoResearch & D0--D4 \\
-CrewAI & Role-based MAS & Leakage / Degradation & Clean / Random / Manual / AutoResearch & D0--D4 \\
-LangGraph & Graph workflow & Leakage / Degradation & Clean / Random / Manual / AutoResearch & D0--D4 \\
+\multirow{4}{*}{LangGraph} & \multirow{4}{*}{Real adapter}
+  & Leakage & AutoResearch & 28 \\
+  & & External leakage & AutoResearch & 28 \\
+  & & Degradation & Family sweep & 28 \\
+  & & Degradation (pilot) & AutoResearch & 104 \\
+\midrule
+\multirow{3}{*}{AgentDojo} & \multirow{3}{*}{Real adapter}
+  & Leakage & AutoResearch & 28 \\
+  & & External leakage & AutoResearch & 28 \\
+  & & Degradation & Family sweep & 28 \\
+\midrule
+\multirow{3}{*}{AutoGen} & \multirow{3}{*}{Official runtime}
+  & Leakage & AutoResearch & 28 \\
+  & & External leakage & AutoResearch & 28 \\
+  & & Degradation & Family sweep & 28 \\
+\midrule
+\multirow{3}{*}{CrewAI} & \multirow{3}{*}{Official runtime}
+  & Leakage & AutoResearch & 28 \\
+  & & External leakage & AutoResearch & 28 \\
+  & & Degradation & Family sweep & 28 \\
 \bottomrule
 \end{tabular}
 \endgroup
 \end{table}
 
+Each small-scale configuration runs one clean execution per task (four
+tasks, for four clean runs) and one attacked execution per task for each of
+six generated attack variants (4 tasks $\times$ 6 variants), giving 28 runs in total. The medium-scale pilot follows the
+same pattern with eight tasks and twelve variants - 104 runs in total. All live-LLM
+runs use the local model \texttt{llama3.2:3b} through Ollama.
+
 \endgroup
-\clearpage
