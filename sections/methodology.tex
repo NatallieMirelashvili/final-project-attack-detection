@@ -69,8 +69,8 @@ times as heavily as internal exposure. Internal leakage still counts toward
 the score, so it is not excluded from the objective. This weighting isolates
 the harder, more conventional disclosure setting in which a defense that
 inspects only the final response would still fail to catch the attack.
-Because these runs are generated and executed as leakage attempts, they can
-also produce a task-success change. We treat that change as a side effect of
+Because these runs are generated and executed under the \texttt{external\_leakage}
+goal, they can also produce a task-success change. We treat that change as a side effect of
 the external leakage objective, not as a degradation result, since these runs
 are optimized for exposure rather than for utility loss.
 
@@ -203,9 +203,10 @@ injection location, the target channel or agent, and auxiliary parameters such
 as stealth level. The runner first executes clean baseline runs, then
 iteratively evaluates attacked runs and records the resulting final outputs,
 task-success indicators, cost counters, and channel-separated traces. The
-same loop supports random sampling, fixed manual baselines, and the
-AutoResearch search generator, enabling direct comparison between
-non-adaptive and reward-adaptive attack generation. Figure~\ref{fig:autoresearch_loop}
+same infrastructure can support random sampling and fixed manual baselines,
+enabling such comparisons in future expanded evaluations; the reported
+evaluation uses the AutoResearch search generator for leakage, external
+leakage, and the medium-scale degradation pilot. Figure~\ref{fig:autoresearch_loop}
 summarizes this optimization loop.
 
 \begin{figure}[H]
@@ -311,10 +312,12 @@ evaluation that inspects only the final answer.
 
 Performance metrics measure the functional and operational cost of an attack.
 They complement the leakage metrics by capturing attacks whose primary effect
-is reduced correctness, increased resource consumption, or slower execution
-rather than secret exposure. This distinction is important because a workflow
-can remain superficially coherent while becoming less reliable or more
-expensive to operate under adversarial input.
+is reduced correctness, increased resource consumption, or additional tool
+calls rather than secret exposure. Although latency can be recorded by the
+framework, the reported evaluation focuses on task success, leakage,
+tool-call increase, and operational degradation score. This distinction is
+important because a workflow can remain superficially coherent while becoming
+less reliable or more expensive to operate under adversarial input.
 
 \begin{table}[H]
 \centering

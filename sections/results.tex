@@ -46,7 +46,7 @@ LangGraph was the most vulnerable system under this objective, with an external 
 
 Table~\ref{tab:external_leakage_results} also reports internal leakage, which remained higher than external leakage under this objective, ranging from 0.667 on LangGraph to 1.000 on AutoGen official, even though the search here is weighted to prioritize final-output exposure. This suggests that internal channels may be an easier target for the search than the final output specifically. Each configuration was evaluated with only six attack variants. A larger search budget could plausibly narrow or reverse this gap.
 
-Clean task success was 1.000 for three systems but only 0.750 for CrewAI official, so its attacked success rate of 0.458 partly reflects that lower baseline. These task-success changes are side effects of external leakage, not degradation results, since these configurations targeted leakage rather than performance.
+Clean task success was 1.000 for three systems but only 0.750 for CrewAI official, so its attacked success rate of 0.458 partly reflects that lower baseline. These task-success changes are side effects of the \texttt{external\_leakage} goal, not degradation utility drop, since these configurations targeted exposure rather than performance degradation.
 
 \begin{table*}[t]
 \centering

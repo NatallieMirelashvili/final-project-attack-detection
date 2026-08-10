@@ -7,7 +7,7 @@ Internal leakage was consistently higher than final-output leakage across all fo
 
 \subsection{Degradation Effectiveness by Attack Family}
 
-RQ2 asks how effective the framework's attacks are at degrading task utility. The aggregate small-scale results suggest a weak effect: LangGraph and AgentDojo showed no utility drop, and official AutoGen and official CrewAI showed only 0.042. The family-level results complicate this picture. \texttt{priority\_conflict} alone produced a 0.250 utility drop on both official AutoGen and official CrewAI, six times the aggregate figure, while the other five families contributed close to nothing. The aggregate number is therefore a poor summary of degradation effectiveness: it reflects five ineffective attack mechanisms and one substantially effective one averaged together, not four systems that are each moderately vulnerable to degradation. Degradation effectiveness in this evaluation depended far more on which attack mechanism was tried than on which system was targeted. The medium-scale LangGraph pilot reinforces this. It used real AutoResearch search, not the fixed family sweep, and found no utility drop at all, suggesting that generic search over the shared attack-variant space, without a mechanism specifically designed to create conflicting priorities, did not rediscover an effect the family sweep found directly.
+RQ2 asks how effective the framework's attacks are at degrading task utility. The aggregate small-scale results suggest a weak effect: LangGraph and AgentDojo showed no utility drop, and official AutoGen and official CrewAI showed only 0.042. The family-level results complicate this picture. \texttt{priority\_conflict} alone produced a 0.250 utility drop on both official AutoGen and official CrewAI, six times the aggregate figure, while the other five families contributed close to nothing. The aggregate number is therefore a poor summary of degradation effectiveness: it reflects five ineffective attack mechanisms and one substantially effective one averaged together, not four systems that are each moderately vulnerable to degradation. Degradation effectiveness in this evaluation appeared to depend strongly on the attack mechanism, especially on whether the tested family created conflicting task priorities. The medium-scale LangGraph pilot reinforces this. It used real AutoResearch search, not the fixed family sweep, and found no utility drop at all, suggesting that generic search over the shared attack-variant space, without a mechanism specifically designed to create conflicting priorities, did not rediscover an effect the family sweep found directly.
 
 \subsection{Variation Across Frameworks}
 
@@ -44,6 +44,10 @@ partially reconstruct a secret without reproducing it verbatim.
 \textbf{Scope of comparison.} This work does not include a random or manually
 designed attack baseline, a cross-framework transfer evaluation, or a defense
 comparison.
+
+\textbf{CrewAI external-leakage baseline.} The lower clean success rate
+observed for CrewAI in the external-leakage setting should be interpreted
+cautiously due to the small number of tasks and possible grading variance.
 
 \textbf{Deployment fidelity.} Canary secrets are synthetic placeholders, not
 data protected by real access controls or output filtering, so measured

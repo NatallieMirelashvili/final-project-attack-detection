@@ -33,12 +33,14 @@ that an internal-channel-aware evaluation would catch. We adopt an
 AutoResearch-style loop, described below: a heuristic search procedure
 generates an attack variant, the variant is run against a target agentic
 system on a fixed task, the outcome is scored against a chosen metric, and
-the variant is kept or discarded before the next is generated. We instantiate this loop twice, for two
-complementary attacker goals: maximizing the rate at which a synthetic canary
-secret is exposed through any channel, final output or internal, and
-degrading task utility and/or amplifying operational cost (extra tool calls,
-latency, tokens) without necessarily leaking a secret. We study both loops
-across four systems - AgentDojo, AutoGen, CrewAI, and LangGraph, configured
+the variant is kept or discarded before the next is generated. In the reported
+evaluation, we operationalize these risks through three experimental goals:
+general channel-aware leakage, external final-output leakage, and performance
+degradation. The framework can also amplify operational cost through extra
+tool calls and token usage; although latency can be recorded as a diagnostic
+signal, the reported evaluation focuses on task success, leakage, tool-call
+increase, and operational degradation score rather than latency. We study these
+goals across four systems---AgentDojo, AutoGen, CrewAI, and LangGraph---configured
 with a shared abstract pipeline so that results are comparable across
 frameworks. Throughout, the attacker only injects content into untrusted
 channels (retrieved documents, tool outputs, task inputs, inter-agent
@@ -101,10 +103,9 @@ This project makes the following contributions:
     and multi-agent LLM systems, in which a heuristic search procedure
     iteratively generates, evaluates, and selects attack variants against a
     fixed target system and task.
-    \item We define two independent optimization objectives for this loop:
-    maximizing the total exposure rate of a synthetic canary secret across
-    final-output and internal channels, and maximizing a weighted combination
-    of task-utility drop and operational-cost amplification.
+    \item We define three experimental attack goals: general information
+    leakage across monitored channels, external leakage into the final
+    user-visible output, and performance degradation.
     \item We define an evaluation methodology that separately measures
     final-output leakage and internal-channel leakage (in tool arguments,
     inter-agent messages, memory writes, and logs), enabling a direct test of
