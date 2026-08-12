@@ -314,6 +314,16 @@ itself reflects exposure in either channel, while the output-only miss rate
 directly quantifies how much of that exposure would be hidden by an
 evaluation that inspects only the final answer.
 
+Following the distinction introduced in Section~6.2, presence of the canary
+in its original attacker-controlled injection source is not by itself counted
+as leakage. Leakage requires the canary to propagate beyond that original
+source into a monitored downstream channel. Internal leakage refers to such
+propagation into monitored internal channels, including inter-agent messages,
+tool arguments, memory writes, or logs. Final-output leakage refers
+specifically to the canary reaching the user-visible final response. Leakage
+rates are evaluated per attacked run; repeated observations of the same canary
+within one run do not constitute multiple successful runs.
+
 \subsection{Performance Metrics}
 
 Performance metrics measure the functional and operational cost of an attack.
@@ -341,7 +351,7 @@ Category & Metric & Description \\
   \cmidrule(lr){2-3}
   & Final-Output Leakage Rate & Fraction of attacked runs in which a canary appears in the user-facing final output. \\
   \cmidrule(lr){2-3}
-  & Internal Leakage Rate & Fraction of attacked runs in which a canary appears in internal channels. \\
+  & Internal Leakage Rate & Fraction of attacked runs in which a canary propagates beyond its original injection source into a monitored internal channel. \\
   \cmidrule(lr){2-3}
   & Output-Only Miss Rate & Fraction of attacked runs that would be missed by final-output-only evaluation. \\
 \midrule
