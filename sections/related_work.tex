@@ -1,9 +1,8 @@
 \section{Related Work}
 
-\subsection{Prompt injection and automated attack generation}
-Prompt injection research studies the failure mode in which LLM-integrated
-applications process trusted instructions and untrusted content within the same
-model context. Early work on indirect prompt injection demonstrated that
+\subsection{Adversarial Attacks and Automated Attack Generation}
+Adversarial input manipulation in LLM-integrated systems includes prompt injection, indirect instructions embedded in retrieved or tool-provided content, and misleading or conflicting context that can alter model behavior or downstream tool use. Prompt injection is one prominent instance of this broader class, in which LLM-integrated applications process trusted instructions and untrusted content within the same model context.
+Early work on indirect prompt injection demonstrated that
 malicious instructions embedded in external sources, such as web pages or
 documents, can later be activated when an application retrieves or summarizes
 that content \cite{greshake2023indirect}. Subsequent formalization and
@@ -95,3 +94,5 @@ controls \cite{yao2024survey}. Overall, the literature shows a gradual shift
 from isolated prompt-level safeguards toward defenses that make trust
 boundaries, data provenance, and tool-use authority explicit parts of the
 application architecture \cite{chen2024struq,jiang2023identifying,yao2024survey}.
+
+Taken together, prior work establishes adversarial input manipulation, including prompt injection, as a central risk for LLM-integrated and tool-using systems, and shows that automated attack generation can expose vulnerabilities that are difficult to find manually. It also shows that effective defenses increasingly depend on explicit trust boundaries, data provenance, and control over how untrusted content influences tool use and model behavior. However, much of this work still evaluates risk through user-visible outcomes, task success, tool execution, or defense-level behavior. In agentic and multi-agent workflows, sensitive information may propagate through internal channels such as inter-agent messages, tool arguments, memory writes, and logs before appearing in, or without ever appearing in, the final output. This leaves a gap in how leakage risk is measured across orchestration frameworks. This project addresses that gap by evaluating both final-output leakage and internal-channel leakage across several agentic system settings.
