@@ -23,24 +23,27 @@ a tool's output, a task input, or a message exchanged between agents may cause
 a secret to surface in a tool argument, an inter-agent message, or a memory
 entry, even when the system's final response to the user appears unremarkable.
 Evaluating only the final output can therefore substantially underestimate how
-exposed such a system really is, and may also miss attacks that degrade task
-performance or increase operational cost without leaking anything at all.
+exposed such a system really is. Once leakage is observed, a secondary question
+is whether the same attack process can be extended to also degrade task
+performance or increase operational cost.
 
 This project combines internal-channel-aware evaluation with AutoResearch-style attack discovery by using internal traces as feedback signals to guide an automated search over attack variants. We ask (i) whether
-this iterative process can identify effective attack variants under a limited search budget, and (ii) whether
-final-output-only evaluation misses leakage and degradation effects in
-internal channels. We adopt an AutoResearch-style loop,
+this iterative process can identify effective leakage-oriented attack variants
+under a limited search budget, and (ii) whether final-output-only evaluation
+misses leakage in internal channels. We additionally examine, as a secondary
+extension, whether successful attacks can be adapted to produce task or
+operational degradation. We adopt an AutoResearch-style loop,
 described below: a heuristic search procedure
 generates an attack variant, the variant is run against a target agentic
 system on a fixed task, the outcome is scored against a chosen metric, and
 the variant is kept or discarded before the next is generated. In the reported
-evaluation, we operationalize these risks through three experimental goals:
-general channel-aware leakage, external final-output leakage, and performance
-degradation. The framework can also amplify operational cost through extra
+evaluation, we therefore treat channel-aware leakage and external final-output
+leakage as the primary goals, and use performance degradation as a secondary
+diagnostic objective. The framework can also amplify operational cost through extra
 tool calls and token usage; although latency can be recorded as a diagnostic
 signal, the reported evaluation focuses on task success, leakage, tool-call
 increase, and operational degradation score rather than latency. We study these
-goals across four systems: AgentDojo, AutoGen, CrewAI, and LangGraph, configured with a shared abstract pipeline to support comparison across frameworks. Throughout, the attacker only injects content into untrusted
+questions across four systems: AgentDojo, AutoGen, CrewAI, and LangGraph, configured with a shared abstract pipeline to support comparison across frameworks. Throughout, the attacker only injects content into untrusted
 channels (retrieved documents, tool outputs, task inputs, inter-agent
 messages), no real user data is involved and all sensitive information is
 represented by synthetic canary secrets in sandboxed tasks.
@@ -105,9 +108,10 @@ This project makes the following contributions:
     A heuristic search procedure iteratively generates, evaluates, and selects
     attack variants using outcomes observed across both internal traces and
     final outputs.
-    \item We define three experimental attack goals: general information
-    leakage across monitored channels, external leakage into the final
-    user-visible output, and performance degradation.
+    \item We define leakage as the primary experimental objective, separating
+    general information leakage across monitored channels from leakage into
+    the final user-visible output. We treat performance degradation as a
+    secondary extension for attacks that succeed under the leakage objective.
     \item We define channel-specific feedback and evaluation measures that
     distinguish final-output leakage from leakage in tool arguments,
     inter-agent messages, memory writes, and logs, enabling the search loop and
@@ -115,7 +119,7 @@ This project makes the following contributions:
     evaluation.
     \item We apply this methodology to four systems spanning single-agent
     (AgentDojo) and multi-agent (AutoGen, CrewAI, LangGraph) architectures,
-    configured with a shared abstract workflow to enable a common evaluation of leakage and degradation behavior across frameworks.
+    configured with a shared abstract workflow to enable a common evaluation of leakage behavior and secondary degradation effects across frameworks.
 \end{itemize}
 
 The source code and experimental materials are available in the project repository:

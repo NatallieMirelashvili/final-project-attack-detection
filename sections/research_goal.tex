@@ -12,17 +12,19 @@ been integrated into an AutoResearch-style loop that uses execution feedback
 to search a structured attack space. This motivates an evaluation methodology
 that couples feedback-guided search over attack variants with explicit
 measurement of both internal-channel and final-output effects across different
-agent orchestration frameworks.
+agent orchestration frameworks. The primary objective is to measure and
+optimize information leakage; performance degradation is considered as a
+secondary extension, evaluated after an attack demonstrates leakage behavior.
 
 \paragraph{Research Questions:}
 \begin{itemize}[leftmargin=2cm]
     \item[\textbf{RQ1:}] How does internal-channel-aware evaluation change the
             measured leakage risk compared with final-output-only evaluation in
             agentic and multi-agent LLM systems?
-    \item[\textbf{RQ2:}] To what extent do adversarial attack variants degrade
-            task utility or increase operational burden in agentic and
-            multi-agent LLM systems?
-    \item[\textbf{RQ3:}] How do leakage, final-output exposure, and degradation
-            effects vary across different agentic and multi-agent orchestration
-            frameworks?
+    \item[\textbf{RQ2:}] Once leakage-oriented attacks succeed, to what extent
+            can they be extended to degrade task utility or increase operational
+            burden?
+    \item[\textbf{RQ3:}] How do leakage and final-output exposure vary across
+            different agentic and multi-agent orchestration frameworks, and what
+            secondary degradation effects are observed?
 \end{itemize}

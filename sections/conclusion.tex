@@ -9,16 +9,23 @@ The qualitative pattern observed in our experiments---substantially greater leak
 
 \subsection{Performance Degradation}
 
-RQ2 asks to what extent adversarial attack variants degrade task utility or
-increase operational burden. Automated search did not identify an attack that
-reduced task success in the reported degradation experiment. A separate
-diagnostic evaluation indicated that manually specified degradation mechanisms
-can affect task success and operational burden, but the automated search did
-not reproduce that behavior.
+RQ2 asks whether leakage-oriented attacks can be extended to degrade task
+utility or increase operational burden. Automated search did not identify an
+attack that reduced task success in the reported degradation experiment. A
+separate diagnostic evaluation indicated that manually specified degradation
+mechanisms can affect task success and operational burden, but the automated
+search did not reproduce that behavior.
 
 \subsection{Variation Across Frameworks}
 
-RQ3 asks how leakage, final-output exposure, and degradation effects vary across frameworks. Leakage varied little: all four systems reached a leakage ASR between 0.958 and 1.000. Final-output exposure varied across systems, from 0.083 in the general leakage setting on AgentDojo to 0.375 under the external-leakage objective on LangGraph, while remaining nonzero in every system under the external-leakage objective. The automated degradation search produced no measurable task-success drop in its reported experiment.
+RQ3 asks how leakage and final-output exposure vary across frameworks, with
+degradation treated as a secondary effect. Leakage varied little: all four
+systems reached a leakage ASR between 0.958 and 1.000. Final-output exposure
+varied across systems, from 0.083 in the general leakage setting on AgentDojo
+to 0.375 under the external-leakage objective on LangGraph, while remaining
+nonzero in every system under the external-leakage objective. The automated
+degradation search produced no measurable task-success drop in its reported
+experiment.
 
 % ============================================================
 \section{Limitations}
@@ -63,9 +70,9 @@ leakage rates reflect propagation through the agent alone.
 % ============================================================
 \section{Ethical Considerations}
 
-All experiments are conducted in controlled environments using synthetic data. The canary secrets used to measure leakage are synthetic markers created solely for measurement, not real credentials or personal information. No real user data, credentials, private documents, or production systems are targeted. The goal of this work is to improve how agentic and multi-agent systems are evaluated for information leakage and performance degradation under adversarial conditions.
+All experiments are conducted in controlled environments using synthetic data. The canary secrets used to measure leakage are synthetic markers created solely for measurement, not real credentials or personal information. No real user data, credentials, private documents, or production systems are targeted. The goal of this work is to improve how agentic and multi-agent systems are evaluated for information leakage under adversarial conditions, with performance degradation considered as a secondary extension.
 
 % ============================================================
 \section{Conclusion}
 
-This project developed an AutoResearch-inspired red-teaming framework for agentic and multi-agent LLM systems, in which a heuristic search procedure generates, executes, and scores attack variants against a target system. We evaluated the framework on four systems, LangGraph, AgentDojo, AutoGen, and CrewAI, across three objectives: information leakage, external leakage into the final output, and performance degradation. Leakage was highly effective across all four systems, with attack success rates between 0.958 and 1.000, and internal-channel leakage consistently exceeded final-output leakage, so an evaluation that inspected only the final output would have substantially underestimated measured exposure. External leakage ASR was lower than internal leakage in every system but remained nonzero in all four. Automated search did not identify an attack that reduced task success in the reported degradation experiment, although the separate diagnostic evaluation indicated that degradation-inducing attack mechanisms exist in the tested setting. The automated search did not reproduce the behavior observed in that diagnostic experiment. Together, the results show that channel-aware evaluation can reveal propagation that is invisible in final-output-only measurements, while the limited degradation search highlights the need for larger and better-controlled evaluations of feedback-guided attack discovery.
+This project developed an AutoResearch-inspired red-teaming framework for agentic and multi-agent LLM systems, in which a heuristic search procedure generates, executes, and scores attack variants against a target system. We evaluated the framework on four systems, LangGraph, AgentDojo, AutoGen, and CrewAI, with information leakage as the primary objective and final-output exposure as a leakage-specific comparison point. Performance degradation was evaluated as a secondary extension rather than as a co-equal objective. Leakage was highly effective across all four systems, with attack success rates between 0.958 and 1.000, and internal-channel leakage consistently exceeded final-output leakage, so an evaluation that inspected only the final output would have substantially underestimated measured exposure. External leakage ASR was lower than internal leakage in every system but remained nonzero in all four. Automated search did not identify an attack that reduced task success in the reported degradation experiment, although the separate diagnostic evaluation indicated that degradation-inducing attack mechanisms exist in the tested setting. The automated search did not reproduce the behavior observed in that diagnostic experiment. Together, the results show that channel-aware evaluation can reveal propagation that is invisible in final-output-only measurements, while the limited degradation search highlights the need for larger and better-controlled evaluations of secondary degradation effects.

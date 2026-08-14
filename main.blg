@@ -11,43 +11,43 @@ Warning--entry type for "autoresearch" isn't style-file defined
 --line 268 of file bib/references.bib
 You've used 20 entries,
             1876 wiz_defined-function locations,
-            575 strings with 8157 characters,
-and the built_in function-call counts, 5324 in all, are:
-= -- 430
+            579 strings with 8179 characters,
+and the built_in function-call counts, 5588 in all, are:
+= -- 466
 > -- 358
 < -- 0
 + -- 127
 - -- 107
-* -- 412
-:= -- 800
+* -- 431
+:= -- 828
 add.period$ -- 21
 call.type$ -- 20
 change.case$ -- 20
 chr.to.int$ -- 0
 cite$ -- 20
-duplicate$ -- 222
-empty$ -- 490
+duplicate$ -- 239
+empty$ -- 508
 format.name$ -- 107
-if$ -- 1248
+if$ -- 1315
 int.to.chr$ -- 0
 int.to.str$ -- 20
-missing$ -- 10
+missing$ -- 11
 newline$ -- 64
 num.names$ -- 20
-pop$ -- 109
+pop$ -- 104
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 165
+skip$ -- 181
 stack$ -- 0
-substring$ -- 236
-swap$ -- 78
+substring$ -- 284
+swap$ -- 91
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
-while$ -- 39
+while$ -- 42
 width$ -- 22
-write$ -- 178
+write$ -- 181
 (There were 3 warnings)

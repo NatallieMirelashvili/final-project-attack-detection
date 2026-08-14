@@ -70,9 +70,10 @@ P.~He, Y.~Lin, S.~Dong, H.~Xu, Y.~Xing, and H.~Liu, ``Red-teaming llm
   Association for Computational Linguistics: ACL 2025}, (Vienna, Austria),
   pp.~6726--6747, Association for Computational Linguistics, 2025.
 
-\bibitem{elyagoubi2026agentleak}
+\bibitem{el2026agentleak}
 F.~El~Yagoubi, G.~Badu-Marfo, and R.~Al~Mallah, ``Agentleak: A benchmark for
-  internal-channel privacy leakage in multi-agent llm systems,'' 2026.
+  internal-channel privacy leakage in multi-agent llm systems,'' {\em IEEE
+  Access}, vol.~14, pp.~94960--94978, 2026.
 
 \bibitem{gomaa2026converse}
 A.~Gomaa, A.~Salem, and S.~Abdelnabi, ``Converse: Benchmarking contextual

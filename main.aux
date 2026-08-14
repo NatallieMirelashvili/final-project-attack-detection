@@ -1,8 +1,7 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\providecommand*\HyPL@Entry[1]{}
-\HyPL@Entry{0<</S/D>>}
-\HyPL@Entry{1<</S/D>>}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{greshake2023indirect,liu2024formalizing}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
 \citation{agentdojo2024}
@@ -28,17 +27,17 @@
 \citation{verifiableagenttoagent2026}
 \citation{learningtoinject2026,verifiableagenttoagent2026}
 \citation{he2025communication}
-\citation{elyagoubi2026agentleak}
+\citation{el2026agentleak}
 \citation{gomaa2026converse}
 \citation{zhang2026privacypeek}
 \citation{liu2024formalizing,yao2024survey}
 \citation{liu2024formalizing,chen2024struq}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Internal-Channel Security in Agentic Systems}{6}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Defenses for LLM-integrated systems}{6}{subsection.2.3}\protected@file@percent }
 \citation{liu2024formalizing,yi2025benchmarking}
 \citation{liu2024formalizing}
 \citation{yi2025benchmarking}
 \citation{liu2024formalizing,yi2025benchmarking}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Internal-Channel Security in Agentic Systems}{6}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Defenses for LLM-integrated systems}{6}{subsection.2.3}\protected@file@percent }
 \citation{chen2024struq,jiang2023identifying}
 \citation{chen2024struq}
 \citation{jiang2023identifying}
@@ -50,7 +49,7 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Attacker Capabilities}{8}{subsection.4.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Attack Goals}{9}{subsection.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Sensitive Information Leakage}{9}{subsubsection.4.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}External Leakage}{9}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}External Leakage}{10}{subsubsection.4.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.3}Performance Degradation}{10}{subsubsection.4.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Out of Scope}{10}{subsection.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {5}Experimental Systems}{10}{section.5}\protected@file@percent }
@@ -70,39 +69,40 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Loop B: Performance Degradation Optimization}{14}{subsection.6.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {7}Evaluation Metrics}{15}{section.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Leakage Metrics}{15}{subsection.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Performance Metrics}{15}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Performance Metrics}{16}{subsection.7.2}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Summary of evaluation metrics.}}{16}{table.caption.4}\protected@file@percent }
 \newlabel{tab:metrics_summary}{{1}{16}{Summary of evaluation metrics}{table.caption.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {8}Experimental Design}{16}{section.8}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Configurations evaluated in this study. All use no defense.}}{17}{table.caption.5}\protected@file@percent }
 \newlabel{tab:exp_matrix}{{2}{17}{Configurations evaluated in this study. All use no defense}{table.caption.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {9}Results}{17}{section.9}\protected@file@percent }
-\newlabel{sec:results}{{9}{17}{Results}{section.9}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Information leakage results in the small-scale live Ollama evaluation.}}{18}{table.caption.6}\protected@file@percent }
-\newlabel{tab:leakage_results}{{3}{18}{Information leakage results in the small-scale live Ollama evaluation}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Results}{18}{section.9}\protected@file@percent }
+\newlabel{sec:results}{{9}{18}{Results}{section.9}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Information Leakage}{18}{subsection.9.1}\protected@file@percent }
 \newlabel{subsec:results_leakage}{{9.1}{18}{Information Leakage}{subsection.9.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces External leakage results in the small-scale live Ollama evaluation. External Leakage ASR is defined as the final-output leakage rate for this objective. Task-success changes in this table are side effects of external leakage, not degradation results.}}{19}{table.caption.7}\protected@file@percent }
-\newlabel{tab:external_leakage_results}{{4}{19}{External leakage results in the small-scale live Ollama evaluation. External Leakage ASR is defined as the final-output leakage rate for this objective. Task-success changes in this table are side effects of external leakage, not degradation results}{table.caption.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Information leakage results in the small-scale live Ollama evaluation.}}{19}{table.caption.6}\protected@file@percent }
+\newlabel{tab:leakage_results}{{3}{19}{Information leakage results in the small-scale live Ollama evaluation}{table.caption.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {9.2}External Leakage}{19}{subsection.9.2}\protected@file@percent }
 \newlabel{subsec:results_external_leakage}{{9.2}{19}{External Leakage}{subsection.9.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Performance Degradation}{19}{subsection.9.3}\protected@file@percent }
 \newlabel{subsec:results_degradation}{{9.3}{19}{Performance Degradation}{subsection.9.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces External leakage results in the small-scale live Ollama evaluation. External Leakage ASR is defined as the final-output leakage rate for this objective. Task-success changes in this table are side effects of external leakage, not degradation results.}}{20}{table.caption.7}\protected@file@percent }
+\newlabel{tab:external_leakage_results}{{4}{20}{External leakage results in the small-scale live Ollama evaluation. External Leakage ASR is defined as the final-output leakage rate for this objective. Task-success changes in this table are side effects of external leakage, not degradation results}{table.caption.7}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Small-scale diagnostic degradation-family sweep. Six manually specified degradation families were evaluated across four tasks per system.}}{20}{table.caption.8}\protected@file@percent }
 \newlabel{tab:degradation_results}{{5}{20}{Small-scale diagnostic degradation-family sweep. Six manually specified degradation families were evaluated across four tasks per system}{table.caption.8}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces LangGraph degradation pilot using AutoResearch search. The experiment used 12 generated attack variants across eight tasks, for 104 total runs.}}{20}{table.caption.9}\protected@file@percent }
-\newlabel{tab:medium_degradation_pilot}{{6}{20}{LangGraph degradation pilot using AutoResearch search. The experiment used 12 generated attack variants across eight tasks, for 104 total runs}{table.caption.9}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {10}Discussion}{20}{section.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Final Output vs. Internal Exposure}{20}{subsection.10.1}\protected@file@percent }
+\citation{el2026agentleak}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces LangGraph degradation pilot using AutoResearch search. The experiment used 12 generated attack variants across eight tasks, for 104 total runs.}}{21}{table.caption.9}\protected@file@percent }
+\newlabel{tab:medium_degradation_pilot}{{6}{21}{LangGraph degradation pilot using AutoResearch search. The experiment used 12 generated attack variants across eight tasks, for 104 total runs}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Discussion}{21}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Final Output vs. Internal Exposure}{21}{subsection.10.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Performance Degradation}{21}{subsection.10.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Variation Across Frameworks}{21}{subsection.10.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {11}Limitations}{21}{section.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {12}Ethical Considerations}{22}{section.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {13}Conclusion}{22}{section.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Variation Across Frameworks}{22}{subsection.10.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {11}Limitations}{22}{section.11}\protected@file@percent }
 \bibstyle{ieeetr}
 \bibdata{bib/references}
 \bibcite{greshake2023indirect}{{1}{}{{}}{{}}}
 \bibcite{liu2024formalizing}{{2}{}{{}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {12}Ethical Considerations}{23}{section.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {13}Conclusion}{23}{section.13}\protected@file@percent }
 \bibcite{agentdojo2024}{{3}{}{{}}{{}}}
 \bibcite{autogen2023}{{4}{}{{}}{{}}}
 \bibcite{crewai}{{5}{}{{}}{{}}}
@@ -114,7 +114,7 @@
 \bibcite{zou2023universal}{{11}{}{{}}{{}}}
 \bibcite{shi2024judgedeceiver}{{12}{}{{}}{{}}}
 \bibcite{he2025communication}{{13}{}{{}}{{}}}
-\bibcite{elyagoubi2026agentleak}{{14}{}{{}}{{}}}
+\bibcite{el2026agentleak}{{14}{}{{}}{{}}}
 \bibcite{gomaa2026converse}{{15}{}{{}}{{}}}
 \bibcite{zhang2026privacypeek}{{16}{}{{}}{{}}}
 \bibcite{yao2024survey}{{17}{}{{}}{{}}}
