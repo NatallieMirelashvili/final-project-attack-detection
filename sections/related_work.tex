@@ -142,3 +142,26 @@ them in one experimental methodology by applying feedback-guided heuristic
 search to attack variants while scoring internal-channel leakage,
 final-output leakage, task degradation, and operational burden under a common
 cross-framework workflow.
+
+\begin{table}[H]
+\centering
+\caption{Positioning relative to selected prior work (qualitative comparison only).}
+\label{tab:related_comparison}
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.13\textwidth}p{0.15\textwidth}cccp{0.22\textwidth}@{}}
+\toprule
+Work & Main focus & \shortstack{Internal\\channels} & \shortstack{Feedback-\\guided search} & \shortstack{Cross-\\framework} & Relation to this project \\
+\midrule
+AgentDojo & Tool-use injection benchmark & Partial & Predefined scenarios & Single env. & Benchmark-oriented tool-use reference; not our runtime \\
+Agent-in-the-Middle & Inter-agent manipulation & Yes & Adaptive attack gen. & Multi settings & Communication-attack focus \\
+AgentLeak & Internal privacy leakage & Yes & Predefined scenarios & Multi-agent & Separates internal vs.\ final-output exposure \\
+ConVerse & Contextual A2A safety & Partial & Predefined scenarios & Conversations & Multi-turn safety benchmark \\
+PrivacyPeek & Acquisition-stage privacy & Tool traces & Predefined scenarios & Agent audits & Measures data acquisition, not only disclosure \\
+AutoInject / Slingshot & Automated attack generation & Varies & RL reward-driven & Not primary focus & Feedback-driven adversarial discovery \\
+This project & Internal-channel red teaming & Yes & Heuristic AutoResearch loop & Four settings & Combines internal-channel measurement with feedback-guided search across agentic settings \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table}

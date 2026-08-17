@@ -23,9 +23,11 @@ degradation treated as a secondary effect. Leakage varied little: all four
 systems reached a leakage ASR between 0.958 and 1.000. Final-output exposure
 varied across systems, from 0.083 in the general leakage setting on AgentDojo
 to 0.375 under the external-leakage objective on LangGraph, while remaining
-nonzero in every system under the external-leakage objective. The automated
-degradation search produced no measurable task-success drop in its reported
-experiment.
+nonzero in every system under the external-leakage objective. Given the small
+number of attacked runs per configuration, these cross-system differences
+should be read as descriptive patterns rather than definitive rankings. The
+automated degradation search produced no measurable task-success drop in its
+reported experiment.
 
 % ============================================================
 \section{Limitations}
@@ -63,15 +65,31 @@ comparison.
 observed for CrewAI in the external-leakage setting should be interpreted
 cautiously due to the small number of tasks and possible grading variance.
 
-\textbf{Deployment realism.} Canary secrets are synthetic placeholders, not
-data protected by real access controls or output filtering, so measured
-leakage rates reflect propagation through the agent alone.
+\textbf{Deployment realism.} Canary secrets are synthetic markers used only
+for measurement; they are not real credentials, private data, or protected
+production secrets. A detected canary exposure therefore measures
+propagation through the experimental workflow, not a real-world breach. As
+defined in Section~7.1, canary presence in the original attacker-controlled
+input is not counted as leakage.
+
+\textbf{Resource and time constraints.} The evaluation was constrained by
+limited compute, time, and search budget. Each small configuration used only
+four tasks and six attack variants, and the AutoResearch search was mostly
+cold-start rather than converged. Future work should evaluate larger task sets,
+larger search budgets, multiple seeds and models, stronger baselines, and
+broader framework or runtime coverage. Where repeated runs are available,
+future work should also report confidence intervals or other uncertainty
+estimates rather than relying on single descriptive proportions.
 
 % ============================================================
 \section{Ethical Considerations}
 
 All experiments are conducted in controlled environments using synthetic data. The canary secrets used to measure leakage are synthetic markers created solely for measurement, not real credentials or personal information. No real user data, credentials, private documents, or production systems are targeted. The goal of this work is to improve how agentic and multi-agent systems are evaluated for information leakage under adversarial conditions, with performance degradation considered as a secondary extension.
 
+\paragraph{AI Usage Disclosure.}
+AI-based tools were used as supporting assistants during the development of this project. Specifically, they were used for language refinement, wording improvements, and spelling and grammar checks. AI assistance was also used during the software development process to support code implementation, debugging, and the configuration and execution of experimental setups. In addition, the live experiments used \texttt{llama3.2:3b} through Ollama as the evaluated model inside the agentic workflows.
+
+All AI-assisted outputs were reviewed and validated by the project authors. The research problem formulation, methodological design, experimental decisions, analysis, interpretation of results, and conclusions remain the responsibility and original work of the authors.
 % ============================================================
 \section{Conclusion}
 
